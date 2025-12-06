@@ -122,5 +122,6 @@ Développé avec WPF (.NET)
 - ✓ Icône personnalisée
 =======
 Version : 1.0.2
-Développé avec (.NET) © c.Lecomte (Skill_Team)
+Développé avec (.NET)
 
+© c.Lecomte (Skill_Team)
