@@ -1,0 +1,7 @@
+C:\Users\c.lecomte\Documents\dev_pyt\CalculatriceMargeWPF\bin\Release\publish\CalculatriceMargeWPF.exe
+C:\Users\c.lecomte\Documents\dev_pyt\CalculatriceMargeWPF\bin\Release\publish\LICENSE.txt
+C:\Users\c.lecomte\Documents\dev_pyt\CalculatriceMargeWPF\bin\Release\publish\README.md
+C:\Users\c.lecomte\Documents\dev_pyt\CalculatriceMargeWPF\bin\Release\publish\CalculatriceMargeWPF.dll
+C:\Users\c.lecomte\Documents\dev_pyt\CalculatriceMargeWPF\bin\Release\publish\CalculatriceMargeWPF.deps.json
+C:\Users\c.lecomte\Documents\dev_pyt\CalculatriceMargeWPF\bin\Release\publish\CalculatriceMargeWPF.runtimeconfig.json
+C:\Users\c.lecomte\Documents\dev_pyt\CalculatriceMargeWPF\bin\Release\publish\CalculatriceMargeWPF.pdb
