@@ -86,17 +86,17 @@ L'historique est automatiquement sauvegardé dans :
 Pour toute question ou suggestion d'amélioration, contactez le développeur.
 
 <<<<<<< HEAD
-Version : 1.0.1
+Version : 1.0.2
 Développé avec WPF (.NET)
 
 ## Historique des versions
 
-### Version 1.0.2 (Actuelle)
+### Version 1.0.2 (Update)
 - ✓ Correction du rechargement des frais généraux depuis l'historique
 - ✓ Support rétrocompatible de l'ancien format d'historique (sans champ MODE)
 - ✓ Conversion automatique des frais en ancienne format (euros → pourcentage)
 
-### Version 1.0.1 (06/12/2025)
+### Version 1.0.1 Update & correctifs 
 - ✓ Correction du bug de suppression d'éléments dans l'historique
 - ✓ Réinitialisation automatique des champs de la calculatrice après suppression d'historique
 - ✓ Améliorations de la stabilité et de la gestion des erreurs
