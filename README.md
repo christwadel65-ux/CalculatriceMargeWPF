@@ -1,6 +1,6 @@
 - Guide d'utilisation
 
-**Version : 1.0.5**
+**Version : 1.0.6**
 Application de calcul de marge commerciale permettant de déterminer rapidement la rentabilité d'un projet en tenant compte du déboursé sec, des frais généraux, du prix de vente et de la TVA.
 
 ## Fonctionnalités principales
@@ -87,7 +87,11 @@ Pour toute question ou suggestion d'amélioration, contactez le développeur.
 
 ## Historique des versions
 
-### Version 1.0.5 (Actuelle)
+### Version 1.0.6 (Actuelle)
+- ✓ Amélioration du Récap rapide : Remplacé "Prix de revient" par "Déboursé sec" (plus intuitif)
+- ✓ Interface harmonisée avec l'ordre logique des données
+
+### Version 1.0.5
 - ✓ Refonte de l'affichage Récap rapide : Prix de revient, Prix HT, Prix TTC
 - ✓ Refonte de l'affichage Résultats : Prix de revient, Marge brute, Marge nette (3 colonnes)
 - ✓ Amélioration du message "À propos" avec détails complets

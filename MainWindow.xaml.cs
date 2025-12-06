@@ -66,7 +66,7 @@ namespace CalculatriceMargeWPF
                 double margeBrutePct = prixVenteHT == 0 ? 0 : (margeBruteEuro / prixVenteHT) * 100;
                 double margeNettePct = prixVenteHT == 0 ? 0 : (margeNetteEuro / prixVenteHT) * 100;
 
-                txtRecapPR.Text = prixRevientTotal.ToString("C");
+                txtRecapDS.Text = debourseSec.ToString("C");
                 txtRecapHT.Text = prixVenteHT.ToString("C");
                 txtRecapTTC.Text = prixTTC.ToString("C");
                 
@@ -115,7 +115,7 @@ namespace CalculatriceMargeWPF
             txtVente.Text = "";
             txtTVA.Text = "20";
             txtFrais.Text = "10";
-            txtRecapPR.Text = string.Empty;
+            txtRecapDS.Text = string.Empty;
             txtRecapHT.Text = string.Empty;
             txtRecapTTC.Text = string.Empty;
             txtPrixRevient.Text = string.Empty;
@@ -419,15 +419,16 @@ namespace CalculatriceMargeWPF
         private void MenuAbout_Click(object sender, RoutedEventArgs e)
         {
             string message = "Calculatrice de Marge\n\n" +
-                           "Version : 1.0.5\n" +
+                           "Version : 1.0.6\n" +
                            "Développé avec WPF (.NET 10)\n\n" +
                            "Application professionnelle de calcul de marge commerciale.\n\n" +
                            "Fonctionnalités :\n" +
                            "• Calcul automatique des marges brute et nette\n" +
                            "• Gestion flexible des frais généraux (% ou €)\n" +
-                           "• Historique intelligent avec rechargement\n" +
+                           "• Historique intelligent avec rechargement et rétrocompatibilité\n" +
                            "• Préconfigurations rapides (Standard, Réduit, Service)\n" +
-                           "• Export et sauvegarde automatique\n" +
+                           "• Récap rapide : Déboursé sec, Prix HT, Prix TTC\n" +
+                           "• Export et sauvegarde automatique avec permissions sécurisées\n" +
                            "• Interface moderne avec thème sombre/clair\n" +
                            "• Séparateurs de milliers et formatage professionnel\n\n" +
                            "© 2025 C. Lecomte - Tous droits réservés";
