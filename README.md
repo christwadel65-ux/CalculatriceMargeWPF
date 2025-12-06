@@ -1,4 +1,4 @@
-7# Calculatrice de Marge - Guide d'utilisation
+- Guide d'utilisation
 
 **Version : 1.0.2**
 Application de calcul de marge commerciale permettant de déterminer rapidement la rentabilité d'un projet en tenant compte du déboursé sec, des frais généraux, du prix de vente et de la TVA.
@@ -91,6 +91,11 @@ Développé avec WPF (.NET)
 
 ## Historique des versions
 
+### Version 1.0.2 (Actuelle)
+- ✓ Correction du rechargement des frais généraux depuis l'historique
+- ✓ Support rétrocompatible de l'ancien format d'historique (sans champ MODE)
+- ✓ Conversion automatique des frais en ancienne format (euros → pourcentage)
+
 ### Version 1.0.1 (06/12/2025)
 - ✓ Correction du bug de suppression d'éléments dans l'historique
 - ✓ Réinitialisation automatique des champs de la calculatrice après suppression d'historique
@@ -99,12 +104,8 @@ Développé avec WPF (.NET)
 - ✓ Inclusion de la licence MIT
 ## Historique des versions
 
-### Version 1.0.2 (Actuelle)
-- ✓ Correction du rechargement des frais généraux depuis l'historique
-- ✓ Support rétrocompatible de l'ancien format d'historique (sans champ MODE)
-- ✓ Conversion automatique des frais en ancienne format (euros → pourcentage)
 
-### Version 1.0.1
+### Version 1.0.1 (Correctif)
 - ✓ Ajout du champ MODE pour stocker le type de frais (% ou EUR) dans l'historique
 - ✓ Séparateurs de milliers pour tous les montants
 - ✓ Formatage professionnel du Récap rapide et des Résultats
