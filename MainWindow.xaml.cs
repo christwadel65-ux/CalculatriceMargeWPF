@@ -1,6 +1,7 @@
 using Microsoft.Win32;
 using System;
 using System.IO;
+using System.Text;
 using System.Windows;
 
 namespace CalculatriceMargeWPF
@@ -14,6 +15,13 @@ namespace CalculatriceMargeWPF
             InitializeComponent();
             EnsureHistoriqueFolder();
             ChargerHistorique();
+            
+            // Initialiser les valeurs par défaut
+            txtDebourse.Text = "0";
+            txtTVA.Text = "20";
+            txtFrais.Text = "10";
+            cmbFraisMode.SelectedIndex = 0;
+            cmbPresets.SelectedIndex = 0;
         }
 
         private void EnsureHistoriqueFolder()
@@ -80,7 +88,8 @@ namespace CalculatriceMargeWPF
 
             if (!titreExiste)
             {
-                string ligneHistorique = $"{DateTime.Now:dd/MM/yyyy HH:mm:ss} | {titre} | DS:{debourseSec:N2} | FG:{fraisEnEuro:N2} | PR:{prixRevientTotal:C} | HT:{prixVenteHT:C} | TTC:{prixTTC:C} | TVA:{tva:F2}% | MB:{margeBruteEuro:C} ({margeBrutePct:F2}%) | MN:{margeNetteEuro:C} ({margeNettePct:F2}%)";
+                string modeFreais = fraisEnPourcent ? "%" : "EUR";
+                string ligneHistorique = $"{DateTime.Now:dd/MM/yyyy HH:mm:ss} | {titre} | DS:{debourseSec:N2} | FG:{fraisGenerauxPct:N2} | MODE:{modeFreais} | PR:{prixRevientTotal:C} | HT:{prixVenteHT:C} | TTC:{prixTTC:C} | TVA:{tva:F2}% | MB:{margeBruteEuro:C} ({margeBrutePct:F2}%) | MN:{margeNetteEuro:C} ({margeNettePct:F2}%)";
                 lstHistorique.Items.Add(ligneHistorique);
                 File.AppendAllText(historiquePath, ligneHistorique + Environment.NewLine);
             }
@@ -172,20 +181,19 @@ namespace CalculatriceMargeWPF
                     lstHistorique.Items.Remove(lstHistorique.SelectedItem);
                     
                     // Réécrire le fichier historique avec les éléments restants
-                    if (File.Exists(historiquePath))
-                    {
-                        File.Delete(historiquePath);
-                    }
-                    
                     if (lstHistorique.Items.Count > 0)
                     {
-                        using (StreamWriter writer = new StreamWriter(historiquePath, true))
+                        StringBuilder sb = new StringBuilder();
+                        foreach (var item in lstHistorique.Items)
                         {
-                            foreach (var item in lstHistorique.Items)
-                            {
-                                writer.WriteLine(item.ToString());
-                            }
+                            sb.AppendLine(item.ToString());
                         }
+                        File.WriteAllText(historiquePath, sb.ToString());
+                    }
+                    else
+                    {
+                        // Si vide, créer un fichier vide
+                        File.WriteAllText(historiquePath, string.Empty);
                     }
                     
                     // Réinitialiser les champs de la calculatrice
@@ -206,7 +214,7 @@ namespace CalculatriceMargeWPF
 
             string item = lstHistorique.SelectedItem.ToString();
             
-            // Parse la ligne d'historique : "dd/MM/yyyy HH:mm:ss | titre | DS:... | FG:... | PR:... | HT:... | TTC:... | TVA:...% | MB:... | MN:..."
+            // Parse la ligne d'historique - gère l'ancien format (sans MODE) et le nouveau (avec MODE)
             var parts = item.Split('|');
             if (parts.Length < 8) return;
 
@@ -225,27 +233,75 @@ namespace CalculatriceMargeWPF
                 
                 // Extraire FG (frais généraux)
                 string fgPart = parts[3].Trim().Replace("FG:", "").Trim();
-                if (double.TryParse(fgPart, out double fg))
+                double fg = 0;
+                if (double.TryParse(fgPart, out fg))
                 {
-                    txtFrais.Text = fg.ToString("F2");
-                }
-                
-                // Extraire HT
-                string htPart = parts[5].Trim().Replace("HT:", "").Trim();
-                // Supprimer tous les caractères non numériques sauf le point et la virgule
-                htPart = System.Text.RegularExpressions.Regex.Replace(htPart, @"[^\d,\.]", "");
-                htPart = htPart.Replace(",", ".");
-                
-                if (double.TryParse(htPart, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double ht))
-                {
-                    txtVente.Text = ht.ToString("F2");
-                }
-                
-                // Extraire TVA
-                string tvaPart = parts[7].Trim().Replace("TVA:", "").Replace("%", "").Trim();
-                if (double.TryParse(tvaPart, out double tva))
-                {
-                    txtTVA.Text = tva.ToString("F2");
+                    // Vérifier si c'est du nouveau format (avec MODE) ou ancien (sans MODE)
+                    string part4Content = parts[4].Trim();
+                    
+                    if (part4Content.StartsWith("MODE:"))
+                    {
+                        // Nouveau format : FG est la valeur brute (25 pour 25%)
+                        txtFrais.Text = fg.ToString("F2");
+                        
+                        // Extraire MODE
+                        string modePart = part4Content.Replace("MODE:", "").Trim();
+                        if (modePart == "%")
+                        {
+                            cmbFraisMode.SelectedIndex = 0;
+                        }
+                        else if (modePart == "EUR")
+                        {
+                            cmbFraisMode.SelectedIndex = 1;
+                        }
+                        
+                        // Extraire HT depuis parts[6]
+                        string htPart = parts[6].Trim().Replace("HT:", "").Trim();
+                        htPart = System.Text.RegularExpressions.Regex.Replace(htPart, @"[^\d,\.]", "");
+                        htPart = htPart.Replace(",", ".");
+                        if (double.TryParse(htPart, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double ht))
+                        {
+                            txtVente.Text = ht.ToString("F2");
+                        }
+                        
+                        // Extraire TVA depuis parts[8]
+                        string tvaPart = parts[8].Trim().Replace("TVA:", "").Replace("%", "").Trim();
+                        if (double.TryParse(tvaPart, out double tva))
+                        {
+                            txtTVA.Text = tva.ToString("F2");
+                        }
+                    }
+                    else if (part4Content.StartsWith("PR:"))
+                    {
+                        // Ancien format (pas de MODE) : FG est la valeur en euros, on doit retrouver le %
+                        // On récupère DS et on calcule le % : fg_pct = (fg / ds) * 100
+                        if (ds > 0)
+                        {
+                            double fgPct = (fg / ds) * 100;
+                            txtFrais.Text = fgPct.ToString("F2");
+                            cmbFraisMode.SelectedIndex = 0; // Mode % par défaut pour ancien format
+                        }
+                        else
+                        {
+                            txtFrais.Text = fg.ToString("F2");
+                        }
+                        
+                        // Extraire HT depuis parts[5]
+                        string htPart = parts[5].Trim().Replace("HT:", "").Trim();
+                        htPart = System.Text.RegularExpressions.Regex.Replace(htPart, @"[^\d,\.]", "");
+                        htPart = htPart.Replace(",", ".");
+                        if (double.TryParse(htPart, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double ht))
+                        {
+                            txtVente.Text = ht.ToString("F2");
+                        }
+                        
+                        // Extraire TVA depuis parts[7]
+                        string tvaPart = parts[7].Trim().Replace("TVA:", "").Replace("%", "").Trim();
+                        if (double.TryParse(tvaPart, out double tva))
+                        {
+                            txtTVA.Text = tva.ToString("F2");
+                        }
+                    }
                 }
 
                 MessageBox.Show("Calcul rechargé depuis l'historique. Cliquez sur 'Calculer' pour voir les résultats.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);

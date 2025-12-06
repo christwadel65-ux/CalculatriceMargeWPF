@@ -2,7 +2,7 @@
 ; Génère un installateur Windows pour l'application
 
 #define MyAppName "Calculatrice de Marge"
-#define MyAppVersion "1.0.1"
+#define MyAppVersion "1.0.2"
 #define MyAppPublisher "C.Lecomte"
 #define MyAppExeName "CalculatriceMarge.exe"
 #define MyAppAssocName MyAppName + " File"

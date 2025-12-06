@@ -1,4 +1,4 @@
-# Calculatrice de Marge - Guide d'utilisation
+7# Calculatrice de Marge - Guide d'utilisation
 
 **Version : 1.0.1**
 Application de calcul de marge commerciale permettant de déterminer rapidement la rentabilité d'un projet en tenant compte du déboursé sec, des frais généraux, du prix de vente et de la TVA.
@@ -85,6 +85,7 @@ L'historique est automatiquement sauvegardé dans :
 
 Pour toute question ou suggestion d'amélioration, contactez le développeur.
 
+<<<<<<< HEAD
 Version : 1.0.1
 Développé avec WPF (.NET)
 
@@ -109,3 +110,7 @@ Développé avec WPF (.NET)
 - ✓ Export des calculs
 - ✓ Mode sombre/clair
 - ✓ Icône personnalisée
+=======
+Version : 1.0
+Développé avec (.NET)
+>>>>>>> 4d54d860aa4595d665dcf8f23e816525867c26a6
