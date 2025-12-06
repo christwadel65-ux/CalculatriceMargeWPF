@@ -252,10 +252,10 @@
                                 <TextBlock x:Name="txtRecapHT" FontSize="18" FontWeight="Bold" Foreground="#2D9CDB"/>
                             </StackPanel>
                             
-                            <!-- Marge nette -->
+                            <!-- Prix TTC -->
                             <StackPanel Grid.Column="2" HorizontalAlignment="Right">
-                                <TextBlock Text="Marge nette" FontSize="12" Foreground="#7F8FA3" Margin="0,0,0,4"/>
-                                <TextBlock x:Name="txtRecapMN" FontSize="18" FontWeight="Bold" Foreground="#27AE60"/>
+                                <TextBlock Text="Prix TTC" FontSize="12" Foreground="#7F8FA3" Margin="0,0,0,4"/>
+                                <TextBlock x:Name="txtRecapTTC" FontSize="18" FontWeight="Bold" Foreground="#27AE60"/>
                             </StackPanel>
                         </Grid>
                     </StackPanel>
@@ -269,31 +269,23 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
                             
-                            <!-- Ligne 1: Prix de revient et Prix TTC -->
-                            <StackPanel Grid.Column="0" Grid.Row="0" Margin="0,0,12,12">
+                            <!-- Prix de revient -->
+                            <StackPanel Grid.Column="0">
                                 <TextBlock Text="Prix de revient (avec frais)" FontSize="11" Foreground="#7F8FA3" Margin="0,0,0,4"/>
                                 <TextBlock x:Name="txtPrixRevient" FontSize="16" FontWeight="Bold" Foreground="#2D9CDB"/>
                             </StackPanel>
-                            <StackPanel Grid.Column="1" Grid.Row="0" Margin="0,0,0,12">
-                                <TextBlock Text="Prix TTC" FontSize="11" Foreground="#7F8FA3" Margin="0,0,0,4"/>
-                                <TextBlock x:Name="txtPrixTTC" FontSize="16" FontWeight="Bold" Foreground="#2D9CDB"/>
-                            </StackPanel>
                             
-                            <!-- Ligne 2: Marge brute -->
-                            <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Margin="0,0,0,12">
+                            <!-- Marge brute -->
+                            <StackPanel Grid.Column="1" HorizontalAlignment="Center">
                                 <TextBlock Text="Marge brute" FontSize="11" Foreground="#7F8FA3" Margin="0,0,0,4"/>
                                 <TextBlock x:Name="txtMargeBrute" FontSize="16" FontWeight="Bold" Foreground="#F39C12"/>
                             </StackPanel>
                             
-                            <!-- Ligne 3: Marge nette -->
-                            <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2">
+                            <!-- Marge nette -->
+                            <StackPanel Grid.Column="2" HorizontalAlignment="Right">
                                 <TextBlock Text="Marge nette" FontSize="11" Foreground="#7F8FA3" Margin="0,0,0,4"/>
                                 <TextBlock x:Name="txtMargeNette" FontSize="16" FontWeight="Bold" Foreground="#27AE60"/>
                             </StackPanel>

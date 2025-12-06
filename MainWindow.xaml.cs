@@ -26,7 +26,9 @@ namespace CalculatriceMargeWPF
 
         private void EnsureHistoriqueFolder()
         {
-            string dossier = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Historique");
+            // Utiliser AppData pour éviter les problèmes de permissions dans Program Files
+            string appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            string dossier = Path.Combine(appDataFolder, "CalculatriceMarge", "Historique");
             if (!Directory.Exists(dossier))
             {
                 Directory.CreateDirectory(dossier);
@@ -48,54 +50,60 @@ namespace CalculatriceMargeWPF
 
         private void btnCalculer_Click(object sender, RoutedEventArgs e)
         {
-            if (!TryLireSaisies(out double debourseSec, out double prixVenteHT, out double tva, out double fraisGenerauxPct, out bool fraisEnPourcent)) return;
-
-            double fraisEnEuro = fraisEnPourcent ? debourseSec * (fraisGenerauxPct / 100) : fraisGenerauxPct;
-            double prixRevientTotal = debourseSec + fraisEnEuro;
-            txtRevient.Text = prixRevientTotal.ToString("F2");
-
-            double prixTTC = prixVenteHT * (1 + tva / 100);
-
-            double margeBruteEuro = prixVenteHT - debourseSec;
-            double margeNetteEuro = prixVenteHT - prixRevientTotal;
-
-            double margeBrutePct = prixVenteHT == 0 ? 0 : (margeBruteEuro / prixVenteHT) * 100;
-            double margeNettePct = prixVenteHT == 0 ? 0 : (margeNetteEuro / prixVenteHT) * 100;
-
-            txtRecapPR.Text = prixRevientTotal.ToString("C");
-            txtRecapHT.Text = prixVenteHT.ToString("C");
-            txtRecapMN.Text = $"{margeNetteEuro:C}";
-            
-            // Mise à jour des résultats détaillés
-            txtPrixRevient.Text = prixRevientTotal.ToString("C");
-            txtPrixTTC.Text = prixTTC.ToString("C");
-            txtMargeBrute.Text = $"{margeBruteEuro:C} ({margeBrutePct:F2}%)";
-            txtMargeNette.Text = $"{margeNetteEuro:C} ({margeNettePct:F2}%)";
-
-            string titre = string.IsNullOrWhiteSpace(txtTitre.Text) ? "Sans titre" : txtTitre.Text;
-            
-            // Vérifier si un calcul avec ce titre existe déjà
-            bool titreExiste = false;
-            foreach (var item in lstHistorique.Items)
+            try
             {
-                string itemStr = item.ToString();
-                if (itemStr.Contains($"| {titre} |"))
+                if (!TryLireSaisies(out double debourseSec, out double prixVenteHT, out double tva, out double fraisGenerauxPct, out bool fraisEnPourcent)) return;
+
+                double fraisEnEuro = fraisEnPourcent ? debourseSec * (fraisGenerauxPct / 100) : fraisGenerauxPct;
+                double prixRevientTotal = debourseSec + fraisEnEuro;
+                txtRevient.Text = prixRevientTotal.ToString("F2");
+
+                double prixTTC = prixVenteHT * (1 + tva / 100);
+
+                double margeBruteEuro = prixVenteHT - debourseSec;
+                double margeNetteEuro = prixVenteHT - prixRevientTotal;
+
+                double margeBrutePct = prixVenteHT == 0 ? 0 : (margeBruteEuro / prixVenteHT) * 100;
+                double margeNettePct = prixVenteHT == 0 ? 0 : (margeNetteEuro / prixVenteHT) * 100;
+
+                txtRecapPR.Text = prixRevientTotal.ToString("C");
+                txtRecapHT.Text = prixVenteHT.ToString("C");
+                txtRecapTTC.Text = prixTTC.ToString("C");
+                
+                // Mise à jour des résultats détaillés
+                txtPrixRevient.Text = prixRevientTotal.ToString("C");
+                txtMargeBrute.Text = $"{margeBruteEuro:C} ({margeBrutePct:F2}%)";
+                txtMargeNette.Text = $"{margeNetteEuro:C} ({margeNettePct:F2}%)";
+
+                string titre = string.IsNullOrWhiteSpace(txtTitre.Text) ? "Sans titre" : txtTitre.Text;
+                
+                // Vérifier si un calcul avec ce titre existe déjà
+                bool titreExiste = false;
+                foreach (var item in lstHistorique.Items)
                 {
-                    titreExiste = true;
-                    break;
+                    string itemStr = item.ToString();
+                    if (itemStr.Contains($"| {titre} |"))
+                    {
+                        titreExiste = true;
+                        break;
+                    }
+                }
+
+                if (!titreExiste)
+                {
+                    string modeFreais = fraisEnPourcent ? "%" : "EUR";
+                    string ligneHistorique = $"{DateTime.Now:dd/MM/yyyy HH:mm:ss} | {titre} | DS:{debourseSec:N2} | FG:{fraisGenerauxPct:N2} | MODE:{modeFreais} | PR:{prixRevientTotal:C} | HT:{prixVenteHT:C} | TTC:{prixTTC:C} | TVA:{tva:F2}% | MB:{margeBruteEuro:C} ({margeBrutePct:F2}%) | MN:{margeNetteEuro:C} ({margeNettePct:F2}%)";
+                    lstHistorique.Items.Add(ligneHistorique);
+                    File.AppendAllText(historiquePath, ligneHistorique + Environment.NewLine);
+                }
+                else
+                {
+                    MessageBox.Show($"Un calcul avec le titre \"{titre}\" existe déjà dans l'historique.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
-
-            if (!titreExiste)
+            catch (Exception ex)
             {
-                string modeFreais = fraisEnPourcent ? "%" : "EUR";
-                string ligneHistorique = $"{DateTime.Now:dd/MM/yyyy HH:mm:ss} | {titre} | DS:{debourseSec:N2} | FG:{fraisGenerauxPct:N2} | MODE:{modeFreais} | PR:{prixRevientTotal:C} | HT:{prixVenteHT:C} | TTC:{prixTTC:C} | TVA:{tva:F2}% | MB:{margeBruteEuro:C} ({margeBrutePct:F2}%) | MN:{margeNetteEuro:C} ({margeNettePct:F2}%)";
-                lstHistorique.Items.Add(ligneHistorique);
-                File.AppendAllText(historiquePath, ligneHistorique + Environment.NewLine);
-            }
-            else
-            {
-                MessageBox.Show($"Un calcul avec le titre \"{titre}\" existe déjà dans l'historique.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"Erreur lors du calcul :\n{ex.Message}\n\nDétails :\n{ex.StackTrace}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -109,9 +117,8 @@ namespace CalculatriceMargeWPF
             txtFrais.Text = "10";
             txtRecapPR.Text = string.Empty;
             txtRecapHT.Text = string.Empty;
-            txtRecapMN.Text = string.Empty;
+            txtRecapTTC.Text = string.Empty;
             txtPrixRevient.Text = string.Empty;
-            txtPrixTTC.Text = string.Empty;
             txtMargeBrute.Text = string.Empty;
             txtMargeNette.Text = string.Empty;
             cmbFraisMode.SelectedIndex = 0;
@@ -412,18 +419,18 @@ namespace CalculatriceMargeWPF
         private void MenuAbout_Click(object sender, RoutedEventArgs e)
         {
             string message = "Calculatrice de Marge\n\n" +
-                           "Version : 1.0.1\n" +
-                           "Développé avec WPF (.NET)\n\n" +
-                           "Application de calcul de marge commerciale permettant de déterminer rapidement la rentabilité d'un projet.\n\n" +
+                           "Version : 1.0.5\n" +
+                           "Développé avec WPF (.NET 10)\n\n" +
+                           "Application professionnelle de calcul de marge commerciale.\n\n" +
                            "Fonctionnalités :\n" +
-                           "• Calcul de marges brute et nette\n" +
-                           "• Gestion des frais généraux (% ou €)\n" +
-                           "• Historique avec sauvegarde automatique\n" +
-                           "• Presets de configuration\n" +
-                           "• Export des calculs\n" +
-                           "• Mode sombre/clair\n\n" +
-                           "• Tous droits réservés\n\n" +
-                           "Auteur: © 2025 c.lecomte";
+                           "• Calcul automatique des marges brute et nette\n" +
+                           "• Gestion flexible des frais généraux (% ou €)\n" +
+                           "• Historique intelligent avec rechargement\n" +
+                           "• Préconfigurations rapides (Standard, Réduit, Service)\n" +
+                           "• Export et sauvegarde automatique\n" +
+                           "• Interface moderne avec thème sombre/clair\n" +
+                           "• Séparateurs de milliers et formatage professionnel\n\n" +
+                           "© 2025 C. Lecomte - Tous droits réservés";
             
             MessageBox.Show(message, "À propos", MessageBoxButton.OK, MessageBoxImage.Information);
         }
