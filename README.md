@@ -119,3 +119,7 @@ Développé avec WPF (.NET)
 - ✓ Export des calculs
 - ✓ Mode sombre/clair
 - ✓ Icône personnalisée
+=======
+Version : 1.0.2
+Développé avec (.NET)
+>>>>>>> 4d54d860aa4595d665dcf8f23e816525867c26a6
