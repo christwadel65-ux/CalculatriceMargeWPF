@@ -121,7 +121,7 @@ Développé avec WPF (.NET)
 - ✓ Mode sombre/clair
 - ✓ Icône personnalisée
 =======
-Version : 1.0.2
+Version : 1.0.0
 Développé avec (.NET)
 
 © c.Lecomte (Skill_Team)
