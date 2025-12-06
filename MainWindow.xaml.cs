@@ -167,15 +167,36 @@ namespace CalculatriceMargeWPF
 
             if (MessageBox.Show("Voulez-vous vraiment supprimer cet élément ?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
-                lstHistorique.Items.Remove(lstHistorique.SelectedItem);
-                using (StreamWriter writer = new StreamWriter(historiquePath))
+                try
                 {
-                    foreach (var item in lstHistorique.Items)
+                    lstHistorique.Items.Remove(lstHistorique.SelectedItem);
+                    
+                    // Réécrire le fichier historique avec les éléments restants
+                    if (File.Exists(historiquePath))
                     {
-                        writer.WriteLine(item.ToString());
+                        File.Delete(historiquePath);
                     }
+                    
+                    if (lstHistorique.Items.Count > 0)
+                    {
+                        using (StreamWriter writer = new StreamWriter(historiquePath, true))
+                        {
+                            foreach (var item in lstHistorique.Items)
+                            {
+                                writer.WriteLine(item.ToString());
+                            }
+                        }
+                    }
+                    
+                    // Réinitialiser les champs de la calculatrice
+                    btnReset_Click(null, null);
+                    
+                    MessageBox.Show("Élément supprimé avec succès.", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
-                MessageBox.Show("Élément supprimé avec succès.", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erreur lors de la suppression : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
@@ -335,7 +356,7 @@ namespace CalculatriceMargeWPF
         private void MenuAbout_Click(object sender, RoutedEventArgs e)
         {
             string message = "Calculatrice de Marge\n\n" +
-                           "Version : 1.0\n" +
+                           "Version : 1.0.1\n" +
                            "Développé avec WPF (.NET)\n\n" +
                            "Application de calcul de marge commerciale permettant de déterminer rapidement la rentabilité d'un projet.\n\n" +
                            "Fonctionnalités :\n" +
@@ -345,7 +366,8 @@ namespace CalculatriceMargeWPF
                            "• Presets de configuration\n" +
                            "• Export des calculs\n" +
                            "• Mode sombre/clair\n\n" +
-                           "© 2025 - Tous droits réservés";
+                           "• Tous droits réservés\n\n" +
+                           "Auteur: © 2025 c.lecomte";
             
             MessageBox.Show(message, "À propos", MessageBoxButton.OK, MessageBoxImage.Information);
         }

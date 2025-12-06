@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CalculatriceMargeWPF")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+370011088aa5e691a44bacc6cf9e45070891e83a")]
 [assembly: System.Reflection.AssemblyProductAttribute("CalculatriceMargeWPF")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CalculatriceMargeWPF")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -18,6 +18,8 @@ C:\Users\c.lecomte\Desktop\CalculatriceMargeWPF\obj\Debug\net10.0-windows\refint
 C:\Users\c.lecomte\Desktop\CalculatriceMargeWPF\obj\Debug\net10.0-windows\CalculatriceMargeWPF.pdb
 C:\Users\c.lecomte\Desktop\CalculatriceMargeWPF\obj\Debug\net10.0-windows\CalculatriceMargeWPF.genruntimeconfig.cache
 C:\Users\c.lecomte\Desktop\CalculatriceMargeWPF\obj\Debug\net10.0-windows\ref\CalculatriceMargeWPF.dll
+C:\Users\c.lecomte\Documents\dev_pyt\CalculatriceMargeWPF\bin\Debug\net10.0-windows\LICENSE.txt
+C:\Users\c.lecomte\Documents\dev_pyt\CalculatriceMargeWPF\bin\Debug\net10.0-windows\README.md
 C:\Users\c.lecomte\Documents\dev_pyt\CalculatriceMargeWPF\bin\Debug\net10.0-windows\CalculatriceMargeWPF.exe
 C:\Users\c.lecomte\Documents\dev_pyt\CalculatriceMargeWPF\bin\Debug\net10.0-windows\CalculatriceMargeWPF.deps.json
 C:\Users\c.lecomte\Documents\dev_pyt\CalculatriceMargeWPF\bin\Debug\net10.0-windows\CalculatriceMargeWPF.runtimeconfig.json
@@ -33,10 +35,9 @@ C:\Users\c.lecomte\Documents\dev_pyt\CalculatriceMargeWPF\obj\Debug\net10.0-wind
 C:\Users\c.lecomte\Documents\dev_pyt\CalculatriceMargeWPF\obj\Debug\net10.0-windows\CalculatriceMargeWPF.AssemblyInfoInputs.cache
 C:\Users\c.lecomte\Documents\dev_pyt\CalculatriceMargeWPF\obj\Debug\net10.0-windows\CalculatriceMargeWPF.AssemblyInfo.cs
 C:\Users\c.lecomte\Documents\dev_pyt\CalculatriceMargeWPF\obj\Debug\net10.0-windows\CalculatriceMargeWPF.csproj.CoreCompileInputs.cache
+C:\Users\c.lecomte\Documents\dev_pyt\CalculatriceMargeWPF\obj\Debug\net10.0-windows\CalculatriceMargeWPF.sourcelink.json
 C:\Users\c.lecomte\Documents\dev_pyt\CalculatriceMargeWPF\obj\Debug\net10.0-windows\CalculatriceMargeWPF.dll
 C:\Users\c.lecomte\Documents\dev_pyt\CalculatriceMargeWPF\obj\Debug\net10.0-windows\refint\CalculatriceMargeWPF.dll
 C:\Users\c.lecomte\Documents\dev_pyt\CalculatriceMargeWPF\obj\Debug\net10.0-windows\CalculatriceMargeWPF.pdb
 C:\Users\c.lecomte\Documents\dev_pyt\CalculatriceMargeWPF\obj\Debug\net10.0-windows\CalculatriceMargeWPF.genruntimeconfig.cache
 C:\Users\c.lecomte\Documents\dev_pyt\CalculatriceMargeWPF\obj\Debug\net10.0-windows\ref\CalculatriceMargeWPF.dll
-C:\Users\c.lecomte\Documents\dev_pyt\CalculatriceMargeWPF\bin\Debug\net10.0-windows\README.md
-C:\Users\c.lecomte\Documents\dev_pyt\CalculatriceMargeWPF\bin\Debug\net10.0-windows\LICENSE.txt
