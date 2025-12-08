@@ -4,6 +4,15 @@
     <TargetFramework>net10.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Images\app_icon.ico</ApplicationIcon>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
+    <Version>2.0.0</Version>
+    <Authors>C. Lecomte</Authors>
+    <Description>Application professionnelle WPF pour calculer intelligemment vos marges brutes et nettes</Description>
+    <PackageProjectUrl>https://github.com/christwadel65-ux/CalculatriceMarge</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/christwadel65-ux/CalculatriceMarge</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
     <Resource Include="Images\app_icon.png" />
