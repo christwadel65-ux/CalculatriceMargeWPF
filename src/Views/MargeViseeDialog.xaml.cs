@@ -15,7 +15,9 @@ namespace CalculatriceMargeWPF.Views
 
         private void BtnOK_Click(object sender, RoutedEventArgs e)
         {
-            if (!double.TryParse(txtMargeNette.Text, out double margeNette))
+            // Nettoyer les séparateurs de milliers avant parsing
+            string margeNetteText = txtMargeNette.Text.Replace(" ", "").Replace(",", ".");
+            if (!double.TryParse(margeNetteText, System.Globalization.CultureInfo.InvariantCulture, out double margeNette))
             {
                 MessageBox.Show("Entrez un pourcentage valide pour la marge nette.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
@@ -32,7 +34,8 @@ namespace CalculatriceMargeWPF.Views
             // Marge brute optionnelle
             if (!string.IsNullOrWhiteSpace(txtMargeBrute.Text))
             {
-                if (double.TryParse(txtMargeBrute.Text, out double margeBrute))
+                string margeBruteText = txtMargeBrute.Text.Replace(" ", "").Replace(",", ".");
+                if (double.TryParse(margeBruteText, System.Globalization.CultureInfo.InvariantCulture, out double margeBrute))
                 {
                     if (margeBrute < 0 || margeBrute > 100)
                     {

@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Input;
 using CalculatriceMargeWPF.Models;
 using CalculatriceMargeWPF.Views;
+using CalculatriceMargeWPF.Helpers;
 
 namespace CalculatriceMargeWPF
 {
@@ -41,6 +42,13 @@ namespace CalculatriceMargeWPF
             // Vider explicitement les champs
             txtDebourse.Clear();
             txtVente.Clear();
+            
+            // Configurer les séparateurs de milliers pour les champs numériques
+            NumberFormatter.SetupThousandsSeparatorTextBox(txtDebourse);
+            NumberFormatter.SetupThousandsSeparatorTextBox(txtVente);
+            NumberFormatter.SetupThousandsSeparatorTextBox(txtFrais);
+            NumberFormatter.SetupThousandsSeparatorTextBox(txtTVA);
+            NumberFormatter.SetupThousandsSeparatorTextBox(txtRevient);
             
             // Support clavier
             this.KeyDown += MainWindow_KeyDown;
@@ -195,13 +203,13 @@ namespace CalculatriceMargeWPF
         {
             try
             {
-                if (!double.TryParse(txtVente.Text, out double prixVente) || prixVente <= 0)
+                if (!NumberFormatter.TryParseFormattedNumber(txtVente.Text, out double prixVente) || prixVente <= 0)
                 {
                     MessageBox.Show("Entrez un prix de vente valide.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
-                if (!double.TryParse(txtTVA.Text, out double tva))
+                if (!NumberFormatter.TryParseFormattedNumber(txtTVA.Text, out double tva))
                 {
                     MessageBox.Show("Entrez une TVA valide.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
@@ -220,7 +228,7 @@ namespace CalculatriceMargeWPF
                 double? margeBruteMin = margeDialog.MargeBruteCible;
 
                 bool fraisEnPourcent = cmbFraisMode.SelectedIndex == 0;
-                if (!double.TryParse(txtFrais.Text, out double fraisGeneraux))
+                if (!NumberFormatter.TryParseFormattedNumber(txtFrais.Text, out double fraisGeneraux))
                     fraisGeneraux = 10;
 
                 var result = _engine.CalculateInverse(prixVente, margeTarget, tva, fraisEnPourcent, fraisGeneraux);
@@ -572,10 +580,10 @@ namespace CalculatriceMargeWPF
             debourseSec = prixVenteHT = tva = fraisGenerauxPct = 0;
             fraisEnPourcent = cmbFraisMode.SelectedIndex == 0;
 
-            bool saisiesValides = double.TryParse(txtDebourse.Text, out debourseSec)
-                                 && double.TryParse(txtVente.Text, out prixVenteHT)
-                                 && double.TryParse(txtTVA.Text, out tva)
-                                 && double.TryParse(txtFrais.Text, out fraisGenerauxPct);
+            bool saisiesValides = NumberFormatter.TryParseFormattedNumber(txtDebourse.Text, out debourseSec)
+                                 && NumberFormatter.TryParseFormattedNumber(txtVente.Text, out prixVenteHT)
+                                 && NumberFormatter.TryParseFormattedNumber(txtTVA.Text, out tva)
+                                 && NumberFormatter.TryParseFormattedNumber(txtFrais.Text, out fraisGenerauxPct);
 
             if (!saisiesValides)
             {

@@ -40,5 +40,6 @@
   <ItemGroup>
     <Compile Include="src\Models\**\*.cs" />
     <Compile Include="src\MVVM\**\*.cs" />
+    <Compile Include="src\Helpers\**\*.cs" />
   </ItemGroup>
 </Project>
