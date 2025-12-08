@@ -1,7 +1,7 @@
 - Guide d'utilisation
 
-**Version : 1.0.6**
-Application de calcul de marge commerciale permettant de déterminer rapidement la rentabilité d'un projet en tenant compte du déboursé sec, des frais généraux, du prix de vente et de la TVA.
+**Version : 2.0**
+Application professionnelle de calcul de marge commerciale permettant de déterminer rapidement la rentabilité d'un projet en tenant compte du déboursé sec, des frais généraux, du prix de vente et de la TVA.
 
 ## Fonctionnalités principales
 
@@ -13,38 +13,51 @@ Application de calcul de marge commerciale permettant de déterminer rapidement 
 - **Prix de vente HT** : Prix de vente hors taxes
 - **TVA** : Taux de TVA applicable (par défaut 20%)
 
-### 2. Résultats affichés
+### 2. Calcul inversé (Nouveau !)
+- **Calcul à rebours** : Déterminez le déboursé sec maximum à partir d'une marge nette cible
+- **Contraintes de marge** : Définissez une marge brute minimale et une marge nette souhaitée
+- **Optimisation automatique** : Le système calcule le prix de revient optimal pour atteindre vos objectifs
+
+### 3. Résultats affichés
 
 #### Récap rapide
-- **Prix de revient** : Déboursé sec + Frais généraux
+- **Déboursé sec** : Coût direct du projet
 - **Prix HT** : Prix de vente hors taxes
-- **Marge nette** : Bénéfice net en euros
+- **Prix TTC** : Prix toutes taxes comprises
 
 #### Résultats détaillés
-- **Prix de revient (avec frais)** : Coût total du projet
-- **Prix TTC** : Prix toutes taxes comprises
+- **Prix de revient (avec frais)** : Coût total du projet incluant les frais généraux
 - **Marge brute** : Différence entre prix HT et déboursé sec (en € et %)
 - **Marge nette** : Différence entre prix HT et prix de revient (en € et %)
 
-### 3. Presets (Préconfigurations)
+### 4. Export et statistiques (Nouveau !)
+- **Export CSV** : Exportez vos calculs au format CSV pour Excel
+- **Rapport HTML** : Générez un rapport détaillé avec graphiques et statistiques
+- **Statistiques avancées** : Analyse complète des marges (moyenne, min, max, écart-type)
+- **Chiffre d'affaires** : Suivi du CA total et des marges cumulées
+
+### 5. Presets (Préconfigurations)
 Trois configurations rapides disponibles :
 - **Standard** : TVA 20%, Frais 25%
 - **Réduit** : TVA 5.5%, Frais 8%
 - **Service** : TVA 10%, Frais 15%
 
-### 4. Historique
+### 6. Historique intelligent
 - **Sauvegarde automatique** : Chaque calcul avec un titre unique est automatiquement sauvegardé
 - **Double-clic pour recharger** : Double-cliquez sur une ligne pour recharger les valeurs du calcul (Déboursé, Frais, Prix HT, TVA)
 - **Suppression** : Supprimez les entrées individuelles (les champs de la calculatrice se réinitialisent automatiquement)
 - **Nettoyer tout** : Supprimez l'historique complet en une seule action
 - **Export** : Sauvegardez l'historique dans un fichier texte (Menu > Fichier > Sauvegarder l'historique)
 
-### 5. Personnalisation
-- **Mode sombre/clair** : Basculez entre les thèmes (Menu > Options > Mode sombre)
+### 7. Personnalisation et raccourcis
+- **Mode sombre/clair** : Basculez entre les thèmes (Menu > Affichage > Mode sombre)
 - **Titre personnalisé** : Donnez un nom unique à chaque calcul pour le retrouver facilement
+- **Undo/Redo** : Annulez ou rétablissez vos calculs (Ctrl+Z / Ctrl+Y)
+- **Calcul rapide** : Appuyez sur Entrée pour lancer le calcul
 
 ## Utilisation pas à pas
 
+### Calcul standard
 1. **Entrez un titre** (optionnel mais recommandé) pour identifier votre calcul
 2. **Saisissez le déboursé sec** : Coût direct du projet
 3. **Définissez les frais généraux** :
@@ -55,12 +68,25 @@ Trois configurations rapides disponibles :
 6. Cliquez sur **"Calculer"** pour voir les résultats
 7. Les résultats s'affichent dans "Récap rapide" et "Résultats"
 
+### Calcul inversé
+1. Laissez le **déboursé sec vide**
+2. Entrez le **prix de vente HT** souhaité
+3. Configurez les **frais généraux** et la **TVA**
+4. Cliquez sur **"Calcul Inversé"**
+5. Définissez vos contraintes :
+   - Marge brute minimale souhaitée (%)
+   - Marge nette cible (%)
+6. Le système calcule automatiquement le déboursé sec maximum possible
+
 ## Raccourcis et astuces
 
+- **Entrée** : Lance le calcul automatiquement
+- **Ctrl+Z / Ctrl+Y** : Annuler / Rétablir les calculs
 - **Réinitialiser** : Efface tous les champs pour un nouveau calcul
 - **Presets** : Utilisez les préconfigurations pour gagner du temps
 - **Historique** : Double-cliquez sur une ligne pour recharger un calcul précédent
-- **Titres uniques** : L'application empêche les doublons dans l'historique
+- **Export** : Utilisez les boutons d'export pour sauvegarder vos analyses
+- **Statistiques** : Consultez les statistiques globales de tous vos calculs
 
 ## Format de l'historique
 
@@ -79,15 +105,28 @@ Chaque ligne contient :
 ## Emplacement des fichiers
 
 L'historique est automatiquement sauvegardé dans :
-`[Dossier de l'application]/Historique/historique.txt`
+`%AppData%\CalculatriceMarge\Historique\historique.txt`
+
+Les exports sont sauvegardés à l'emplacement de votre choix.
 
 ## Support
 
-Pour toute question ou suggestion d'amélioration, contactez le développeur.
+Pour toute question ou suggestion d'amélioration, contactez le développeur ou consultez le repository GitHub.
 
 ## Historique des versions
 
-### Version 1.0.6 (Actuelle)
+### Version 2.0 (Actuelle)
+- ✨ **Calcul inversé** : Déterminez le déboursé sec à partir d'une marge cible
+- ✨ **Export CSV** : Exportez tous vos calculs au format CSV
+- ✨ **Rapport HTML** : Générez des rapports professionnels avec statistiques
+- ✨ **Statistiques avancées** : Analyse complète (moyenne, min, max, écart-type)
+- ✨ **Undo/Redo** : Navigation dans l'historique des calculs (Ctrl+Z/Ctrl+Y)
+- ✨ **Séparateurs de milliers** : Formatage professionnel des montants
+- ✨ **Interface améliorée** : Nouveau design avec cartes et ombres portées
+- 🔧 Refactoring complet de l'architecture (MVVM, Services, Helpers)
+- 🔧 Moteur de calcul robuste avec gestion d'erreurs avancée
+
+### Version 1.0.6
 - ✓ Amélioration du Récap rapide : Remplacé "Prix de revient" par "Déboursé sec" (plus intuitif)
 - ✓ Interface harmonisée avec l'ordre logique des données
 
