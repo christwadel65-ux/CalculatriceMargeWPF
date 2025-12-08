@@ -34,7 +34,7 @@ SolidCompression=yes
 WizardStyle=modern
 PrivilegesRequired=lowest
 ArchitecturesInstallIn64BitMode=x64 arm64
-ArchitecturesAllowed=x64 arm64 ia32
+ArchitecturesAllowed=x64 arm64 x86
 
 ; Langue par défaut
 DefaultLanguage=french
