@@ -1,26 +1,71 @@
 using Microsoft.Win32;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Windows;
+using System.Windows.Input;
+using CalculatriceMargeWPF.Models;
 
 namespace CalculatriceMargeWPF
 {
     public partial class MainWindow : Window
     {
         private string historiquePath = "Historique/historique.txt";
+        private CalculationEngine _engine;
+        private UndoRedoManager _undoRedoManager;
+        private PresetManager _presetManager;
+        private List<CalculationEngine.CalculationResult> _resultsList;
 
         public MainWindow()
         {
             InitializeComponent();
+            _engine = new CalculationEngine();
+            _undoRedoManager = new UndoRedoManager();
+            _presetManager = new PresetManager();
+            _resultsList = new List<CalculationEngine.CalculationResult>();
+            
             EnsureHistoriqueFolder();
             ChargerHistorique();
+            ChargerPresets();
             
             // Initialiser les valeurs par défaut
             txtDebourse.Text = "0";
             txtTVA.Text = "20";
             txtFrais.Text = "10";
             cmbFraisMode.SelectedIndex = 0;
+            cmbPresets.SelectedIndex = 0;
+            
+            // Support clavier
+            this.KeyDown += MainWindow_KeyDown;
+        }
+
+        private void MainWindow_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Return) // Entrée pour calculer
+            {
+                btnCalculer_Click(null, null);
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Z && (Keyboard.Modifiers & ModifierKeys.Control) != 0) // Ctrl+Z pour Undo
+            {
+                ExecuteUndo();
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Y && (Keyboard.Modifiers & ModifierKeys.Control) != 0) // Ctrl+Y pour Redo
+            {
+                ExecuteRedo();
+                e.Handled = true;
+            }
+        }
+
+        private void ChargerPresets()
+        {
+            cmbPresets.Items.Clear();
+            cmbPresets.Items.Add("Standard (20% TVA, 10% FG)");
+            cmbPresets.Items.Add("Réduit (5.5% TVA, 8% FG)");
+            cmbPresets.Items.Add("Service (10% TVA, 15% FG)");
             cmbPresets.SelectedIndex = 0;
         }
 
@@ -52,58 +97,231 @@ namespace CalculatriceMargeWPF
         {
             try
             {
-                if (!TryLireSaisies(out double debourseSec, out double prixVenteHT, out double tva, out double fraisGenerauxPct, out bool fraisEnPourcent)) return;
+                if (!TryLireSaisies(out double debourseSec, out double prixVenteHT, out double tva, out double fraisGenerauxPct, out bool fraisEnPourcent)) 
+                    return;
 
-                double fraisEnEuro = fraisEnPourcent ? debourseSec * (fraisGenerauxPct / 100) : fraisGenerauxPct;
-                double prixRevientTotal = debourseSec + fraisEnEuro;
-                txtRevient.Text = prixRevientTotal.ToString("F2");
-
-                double prixTTC = prixVenteHT * (1 + tva / 100);
-
-                double margeBruteEuro = prixVenteHT - debourseSec;
-                double margeNetteEuro = prixVenteHT - prixRevientTotal;
-
-                double margeBrutePct = prixVenteHT == 0 ? 0 : (margeBruteEuro / prixVenteHT) * 100;
-                double margeNettePct = prixVenteHT == 0 ? 0 : (margeNetteEuro / prixVenteHT) * 100;
-
-                txtRecapDS.Text = debourseSec.ToString("C");
-                txtRecapHT.Text = prixVenteHT.ToString("C");
-                txtRecapTTC.Text = prixTTC.ToString("C");
+                // Utiliser le CalculationEngine
+                var result = _engine.Calculate(debourseSec, prixVenteHT, tva, fraisGenerauxPct, fraisEnPourcent);
                 
-                // Mise à jour des résultats détaillés
-                txtPrixRevient.Text = prixRevientTotal.ToString("C");
-                txtMargeBrute.Text = $"{margeBruteEuro:C} ({margeBrutePct:F2}%)";
-                txtMargeNette.Text = $"{margeNetteEuro:C} ({margeNettePct:F2}%)";
-
-                string titre = string.IsNullOrWhiteSpace(txtTitre.Text) ? "Sans titre" : txtTitre.Text;
+                // Récupérer le titre
+                result.Titre = string.IsNullOrWhiteSpace(txtTitre.Text) ? "Sans titre" : txtTitre.Text;
                 
-                // Vérifier si un calcul avec ce titre existe déjà
-                bool titreExiste = false;
-                foreach (var item in lstHistorique.Items)
-                {
-                    string itemStr = item.ToString();
-                    if (itemStr.Contains($"| {titre} |"))
-                    {
-                        titreExiste = true;
-                        break;
-                    }
-                }
-
+                // Vérifier les doublons
+                bool titreExiste = _resultsList.Any(r => r.Titre == result.Titre);
+                
                 if (!titreExiste)
                 {
-                    string modeFreais = fraisEnPourcent ? "%" : "EUR";
-                    string ligneHistorique = $"{DateTime.Now:dd/MM/yyyy HH:mm:ss} | {titre} | DS:{debourseSec:N2} | FG:{fraisGenerauxPct:N2} | MODE:{modeFreais} | PR:{prixRevientTotal:C} | HT:{prixVenteHT:C} | TTC:{prixTTC:C} | TVA:{tva:F2}% | MB:{margeBruteEuro:C} ({margeBrutePct:F2}%) | MN:{margeNetteEuro:C} ({margeNettePct:F2}%)";
-                    lstHistorique.Items.Add(ligneHistorique);
-                    File.AppendAllText(historiquePath, ligneHistorique + Environment.NewLine);
+                    // Ajouter aux résultats
+                    _resultsList.Add(result);
+                    _undoRedoManager.Push(result);
+                    
+                    // Afficher les résultats
+                    AfficherResultats(result);
+                    
+                    // Sauvegarder dans l'historique
+                    lstHistorique.Items.Add(result.ToString());
+                    File.AppendAllText(historiquePath, result.ToString() + Environment.NewLine);
                 }
                 else
                 {
-                    MessageBox.Show($"Un calcul avec le titre \"{titre}\" existe déjà dans l'historique.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show($"Un calcul avec le titre \"{result.Titre}\" existe déjà.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (ArgumentException ex)
+            {
+                MessageBox.Show($"Erreur de validation:\n{ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors du calcul:\n{ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void AfficherResultats(CalculationEngine.CalculationResult result)
+        {
+            txtRevient.Text = result.PrixRevientTotal.ToString("F2");
+            txtRecapDS.Text = result.DebourseSec.ToString("C");
+            txtRecapHT.Text = result.PrixVenteHT.ToString("C");
+            txtRecapTTC.Text = result.PrixVenteTTC.ToString("C");
+            txtPrixRevient.Text = result.PrixRevientTotal.ToString("C");
+            txtMargeBrute.Text = $"{result.MargeBruteEuro:C} ({result.MargeBrutePct:F2}%)";
+            txtMargeNette.Text = $"{result.MargeNetteEuro:C} ({result.MargeNettePct:F2}%)";
+            
+            // Alerte si marge < 15%
+            // Note: Ajouter lblAvertissement dans le XAML pour afficher ces alertes
+            //if (result.MargeNettePct < 15)
+            //{
+            //    lblAvertissement.Content = $"⚠️ Marge faible ({result.MargeNettePct:F1}%)";
+            //    lblAvertissement.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(227, 76, 60));
+            //}
+            //else if (result.MargeNettePct >= 25)
+            //{
+            //    lblAvertissement.Content = $"✓ Marge saine ({result.MargeNettePct:F1}%)";
+            //    lblAvertissement.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(39, 174, 96));
+            //}
+            //else
+            //{
+            //    lblAvertissement.Content = $"≈ Marge acceptable ({result.MargeNettePct:F1}%)";
+            //    lblAvertissement.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(241, 196, 15));
+            //}
+        }
+
+        private void ExecuteUndo()
+        {
+            var previous = _undoRedoManager.Undo();
+            if (previous != null)
+            {
+                AfficherResultats(previous);
+                MessageBox.Show("Calcul annulé (Undo)", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private void ExecuteRedo()
+        {
+            var next = _undoRedoManager.Redo();
+            if (next != null)
+            {
+                AfficherResultats(next);
+                MessageBox.Show("Calcul rétabli (Redo)", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private void btnCalculInverse_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (!double.TryParse(txtVente.Text, out double prixVente) || prixVente <= 0)
+                {
+                    MessageBox.Show("Entrez un prix de vente valide.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                if (!double.TryParse(txtTVA.Text, out double tva))
+                {
+                    MessageBox.Show("Entrez une TVA valide.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                // Demander la marge nette cible
+                var dialog = new System.Windows.Controls.TextBlock { Text = "Marge nette cible (%): " };
+                var input = new System.Windows.Controls.TextBox { Width = 100 };
+                input.Text = "25";
+
+                if (!double.TryParse(input.Text, out double margeTarget))
+                {
+                    MessageBox.Show("Entrez un pourcentage valide.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                bool fraisEnPourcent = cmbFraisMode.SelectedIndex == 0;
+                if (!double.TryParse(txtFrais.Text, out double fraisGeneraux))
+                    fraisGeneraux = 10;
+
+                var result = _engine.CalculateInverse(prixVente, margeTarget, tva, fraisEnPourcent, fraisGeneraux);
+                result.Titre = string.IsNullOrWhiteSpace(txtTitre.Text) ? "Sans titre (inversé)" : $"{txtTitre.Text} (inversé)";
+
+                _resultsList.Add(result);
+                _undoRedoManager.Push(result);
+                AfficherResultats(result);
+
+                txtDebourse.Text = result.DebourseSec.ToString("F2");
+                MessageBox.Show($"Calcul inversé:\nDéboursé sec max: {result.DebourseSec:F2}€", "Résultat", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur calcul inversé:\n{ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void btnExportCSV_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (_resultsList.Count == 0)
+                {
+                    MessageBox.Show("Aucun calcul à exporter.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                SaveFileDialog dialog = new SaveFileDialog
+                {
+                    Filter = "CSV (*.csv)|*.csv",
+                    DefaultExt = ".csv",
+                    FileName = $"marges_{DateTime.Now:yyyyMMdd_HHmmss}.csv"
+                };
+
+                if (dialog.ShowDialog() == true)
+                {
+                    ExportManager.ExportToCSV(_resultsList, dialog.FileName);
+                    MessageBox.Show($"Exporté vers:\n{dialog.FileName}", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erreur lors du calcul :\n{ex.Message}\n\nDétails :\n{ex.StackTrace}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Erreur export:\n{ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void btnExportHTML_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (_resultsList.Count == 0)
+                {
+                    MessageBox.Show("Aucun calcul à exporter.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                var stats = _engine.ComputeStatistics(_resultsList.ToArray());
+
+                SaveFileDialog dialog = new SaveFileDialog
+                {
+                    Filter = "HTML (*.html)|*.html",
+                    DefaultExt = ".html",
+                    FileName = $"rapport_marges_{DateTime.Now:yyyyMMdd_HHmmss}.html"
+                };
+
+                if (dialog.ShowDialog() == true)
+                {
+                    ExportManager.ExportToHTML(stats, _resultsList, dialog.FileName);
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = dialog.FileName, UseShellExecute = true });
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur export:\n{ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void btnStatistiques_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (_resultsList.Count == 0)
+                {
+                    MessageBox.Show("Aucun calcul pour les statistiques.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                var stats = _engine.ComputeStatistics(_resultsList.ToArray());
+
+                string message = $"STATISTIQUES ({stats.NombreCalculs} calculs)\n\n" +
+                    $"Chiffre d'affaires TTC: {stats.ChiffreAffairesTotal:F2}€\n" +
+                    $"Marge nette totale: {stats.MargeNetteEuroTotal:F2}€\n\n" +
+                    $"MARGE BRUTE\n" +
+                    $"Moyenne: {stats.MoyenneMargeBrutePct:F2}%\n" +
+                    $"Min - Max: {stats.MinMargeBrutePct:F2}% - {stats.MaxMargeBrutePct:F2}%\n" +
+                    $"Écart-type: {stats.EcartTypeMargeBrutePct:F2}%\n\n" +
+                    $"MARGE NETTE\n" +
+                    $"Moyenne: {stats.MoyenneMargeNettePct:F2}%\n" +
+                    $"Min - Max: {stats.MinMargeNettePct:F2}% - {stats.MaxMargeNettePct:F2}%\n" +
+                    $"Écart-type: {stats.EcartTypeMargeNettePct:F2}%";
+
+                MessageBox.Show(message, "Statistiques", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur calcul statistiques:\n{ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
