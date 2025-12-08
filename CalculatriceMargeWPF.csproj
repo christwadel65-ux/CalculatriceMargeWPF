@@ -3,7 +3,9 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
-    <ApplicationIcon>Images\app_icon.ico</ApplicationIcon>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <EnableDefaultPageItems>false</EnableDefaultPageItems>
+    <ApplicationIcon>src\Resources\Images\app_icon.ico</ApplicationIcon>
     <AssemblyVersion>2.0.0.0</AssemblyVersion>
     <FileVersion>2.0.0.0</FileVersion>
     <Version>2.0.0</Version>
@@ -15,12 +17,26 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
-    <Resource Include="Images\app_icon.png" />
-    <None Update="README.md">
+    <Resource Include="src\Resources\Images\app_icon.png" />
+    <None Update="docs\README.md">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="LICENSE.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <!-- WPF XAML Files -->
+  <ItemGroup>
+    <ApplicationDefinition Include="src\App.xaml" />
+    <Page Include="src\Views\MainWindow.xaml" />
+    <Compile Include="src\App.xaml.cs" DependentUpon="src\App.xaml" />
+    <Compile Include="src\Views\MainWindow.xaml.cs" DependentUpon="src\Views\MainWindow.xaml" />
+  </ItemGroup>
+
+  <!-- C# Source Files -->
+  <ItemGroup>
+    <Compile Include="src\Models\**\*.cs" />
+    <Compile Include="src\MVVM\**\*.cs" />
   </ItemGroup>
 </Project>
