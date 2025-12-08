@@ -7,7 +7,9 @@
 #define MyAppPublisher "C. Lecomte"
 #define MyAppURL "https://github.com/christwadel65-ux/CalculatriceMarge"
 #define MyAppExeName "CalculatriceMargeWPF.exe"
-#define MySourceDir "bin\Release\net10.0-windows"
+#define MySourceDir "..\bin\Release\net10.0-windows"
+#define MyImagesDir "..\src\Resources\Images"
+#define MyDocsDir "..\docs"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -23,10 +25,10 @@ AppUpdatesURL={#MyAppURL}/releases
 DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
-LicenseFile=LICENSE
-OutputDir=bin\Release\Installer
+LicenseFile=..\LICENSE.txt
+OutputDir=..\bin\Release\Installer
 OutputBaseFilename=CalculatriceMargeInstaller_v{#MyAppVersion}
-SetupIconFile=Images\app_icon.ico
+SetupIconFile={#MyImagesDir}\app_icon.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -43,25 +45,32 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked and SkipIfNotExists
+Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 Name: "startup"; Description: "Lancer l'application au démarrage"; GroupDescription: "Options de démarrage"
 
 [Files]
 ; Application principale
-Source: "{#MySourceDir}\CalculatriceMargeWPF.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#MySourceDir}\CalculatriceMargeWPF.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#MySourceDir}\*.dll"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "{#MySourceDir}\*.exe"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#MySourceDir}\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#MySourceDir}\CalculatriceMargeWPF.deps.json"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#MySourceDir}\CalculatriceMargeWPF.runtimeconfig.json"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#MySourceDir}\*.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#MySourceDir}\*.json"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "{#MySourceDir}\*.config"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
 
 ; Assets et ressources
-Source: "Images\*"; DestDir: "{app}\Images"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "Resources\*"; DestDir: "{app}\Resources"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#MyImagesDir}\*"; DestDir: "{app}\Resources\Images"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; Documentation
-Source: "README_V2.md"; DestDir: "{app}"; Flags: ignoreversion isreadme
-Source: "CHANGELOG_V2.md"; DestDir: "{app}"; Flags: ignoreversion
-Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion
-Source: "IMPLEMENTATION_SUMMARY.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#MyDocsDir}\README.md"; DestDir: "{app}\docs"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#MyDocsDir}\guides\README_V2.md"; DestDir: "{app}\docs\guides"; Flags: ignoreversion
+Source: "{#MyDocsDir}\guides\IMPLEMENTATION_SUMMARY.md"; DestDir: "{app}\docs\guides"; Flags: ignoreversion
+Source: "{#MyDocsDir}\guides\INSTALLER_GUIDE.md"; DestDir: "{app}\docs\guides"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "{#MyDocsDir}\guides\INSTRUCTIONS_APK_ANDROID.md"; DestDir: "{app}\docs\guides"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "{#MyDocsDir}\guides\INSTALLER.md"; DestDir: "{app}\docs\guides"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "{#MyDocsDir}\releases\CHANGELOG_V2.md"; DestDir: "{app}\docs\releases"; Flags: ignoreversion
+Source: "{#MyDocsDir}\releases\RELEASE_NOTES_V2.md"; DestDir: "{app}\docs\releases"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "{#MyDocsDir}\releases\RELEASE_SUMMARY.md"; DestDir: "{app}\docs\releases"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "..\LICENSE.txt"; DestDir: "{app}"; Flags: ignoreversion
 
 ; Runtime .NET (si nécessaire - optionnel si déjà installé)
 ; Source: "dotnet-runtime-10.0-windows-x64.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
@@ -69,10 +78,10 @@ Source: "IMPLEMENTATION_SUMMARY.md"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files.
 
 [Icons]
-Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\Images\app_icon.ico"
+Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\Resources\Images\app_icon.ico"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
-Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon; IconFilename: "{app}\Images\app_icon.ico"
-Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: quicklaunchicon; IconFilename: "{app}\Images\app_icon.ico"
+Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon; IconFilename: "{app}\Resources\Images\app_icon.ico"
+Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: quicklaunchicon; IconFilename: "{app}\Resources\Images\app_icon.ico"
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
@@ -88,7 +97,7 @@ Root: HKA; Subkey: "Software\{#MyAppPublisher}\{#MyAppName}"; ValueType: string;
 
 [UninstallDelete]
 ; Supprimer les dossiers créés lors de l'installation
-Type: dirifempty; Name: "{app}\Images"
+Type: dirifempty; Name: "{app}\Resources\Images"
 Type: dirifempty; Name: "{app}\Resources"
 Type: dirifempty; Name: "{app}"
 
