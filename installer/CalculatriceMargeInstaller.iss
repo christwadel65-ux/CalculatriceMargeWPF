@@ -36,8 +36,9 @@ PrivilegesRequired=lowest
 ArchitecturesInstallIn64BitMode=x64 arm64
 ArchitecturesAllowed=x64 arm64 x86
 
-; Langue par défaut
-DefaultLanguage=french
+; Langue par défaut (fallback si French.isl non présent)
+DefaultLanguage=english
+LanguageDetectionMethod=uilanguage
 
 [Languages]
 Name: "french"; MessagesFile: "compiler:Languages\French.isl"
