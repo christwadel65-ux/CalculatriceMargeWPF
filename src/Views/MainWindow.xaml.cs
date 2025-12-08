@@ -76,7 +76,7 @@ namespace CalculatriceMargeWPF
         private void ChargerPresets()
         {
             cmbPresets.Items.Clear();
-            cmbPresets.Items.Add("Standard (20% TVA, 10% FG)");
+            cmbPresets.Items.Add("Standard (20% TVA, 25% FG)");
             cmbPresets.Items.Add("Réduit (5.5% TVA, 8% FG)");
             cmbPresets.Items.Add("Service (10% TVA, 15% FG)");
             cmbPresets.SelectedIndex = 0;
