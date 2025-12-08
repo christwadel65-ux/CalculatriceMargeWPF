@@ -144,7 +144,7 @@ end;
 
 procedure DeinitializeSetup;
 begin
-  if not UsingWizard and (ExitCode <> 0) then
+  if ExitCode <> 0 then
   begin
     MsgBox('L''installation a été annulée ou a échoué.', mbInformation, MB_OK);
   end;
