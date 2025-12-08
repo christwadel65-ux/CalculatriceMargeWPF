@@ -142,10 +142,3 @@ begin
   end;
 end;
 
-procedure DeinitializeSetup;
-begin
-  if ExitCode <> 0 then
-  begin
-    MsgBox('L''installation a été annulée ou a échoué.', mbInformation, MB_OK);
-  end;
-end;
