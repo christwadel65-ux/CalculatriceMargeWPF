@@ -30,8 +30,10 @@
   <ItemGroup>
     <ApplicationDefinition Include="src\App.xaml" />
     <Page Include="src\Views\MainWindow.xaml" />
+    <Page Include="src\Views\MargeViseeDialog.xaml" />
     <Compile Include="src\App.xaml.cs" DependentUpon="src\App.xaml" />
     <Compile Include="src\Views\MainWindow.xaml.cs" DependentUpon="src\Views\MainWindow.xaml" />
+    <Compile Include="src\Views\MargeViseeDialog.xaml.cs" DependentUpon="src\Views\MargeViseeDialog.xaml" />
   </ItemGroup>
 
   <!-- C# Source Files -->

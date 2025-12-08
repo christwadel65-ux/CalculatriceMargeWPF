@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Input;
 using CalculatriceMargeWPF.Models;
+using CalculatriceMargeWPF.Views;
 
 namespace CalculatriceMargeWPF
 {
@@ -206,16 +207,17 @@ namespace CalculatriceMargeWPF
                     return;
                 }
 
-                // Demander la marge nette cible
-                var dialog = new System.Windows.Controls.TextBlock { Text = "Marge nette cible (%): " };
-                var input = new System.Windows.Controls.TextBox { Width = 100 };
-                input.Text = "25";
-
-                if (!double.TryParse(input.Text, out double margeTarget))
+                // Ouvrir la fenêtre de saisie de la marge visée
+                var margeDialog = new MargeViseeDialog();
+                margeDialog.Owner = this;
+                
+                if (margeDialog.ShowDialog() != true || !margeDialog.IsConfirmed)
                 {
-                    MessageBox.Show("Entrez un pourcentage valide.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
+                    return; // Annulation
                 }
+
+                double margeTarget = margeDialog.MargeNetteCible;
+                double? margeBruteMin = margeDialog.MargeBruteCible;
 
                 bool fraisEnPourcent = cmbFraisMode.SelectedIndex == 0;
                 if (!double.TryParse(txtFrais.Text, out double fraisGeneraux))
@@ -224,12 +226,36 @@ namespace CalculatriceMargeWPF
                 var result = _engine.CalculateInverse(prixVente, margeTarget, tva, fraisEnPourcent, fraisGeneraux);
                 result.Titre = string.IsNullOrWhiteSpace(txtTitre.Text) ? "Sans titre (inversé)" : $"{txtTitre.Text} (inversé)";
 
+                // Vérifier la contrainte de marge brute si définie
+                if (margeBruteMin.HasValue && result.MargeBrutePct < margeBruteMin.Value)
+                {
+                    MessageBox.Show(
+                        $"⚠️ Attention: La marge brute calculée ({result.MargeBrutePct:F2}%) est inférieure à la minimale demandée ({margeBruteMin.Value:F2}%).\n\n" +
+                        $"Déboursé sec: {result.DebourseSec:F2}€\n" +
+                        $"Prix de revient: {result.PrixRevientTotal:F2}€\n" +
+                        $"Marge brute: {result.MargeBrutePct:F2}%\n" +
+                        $"Marge nette: {result.MargeNettePct:F2}%",
+                        "Résultat (sous contrainte)", 
+                        MessageBoxButton.OK, 
+                        MessageBoxImage.Warning);
+                }
+                else
+                {
+                    MessageBox.Show(
+                        $"✓ Calcul inversé réussi:\n\n" +
+                        $"Déboursé sec max: {result.DebourseSec:F2}€\n" +
+                        $"Prix de revient: {result.PrixRevientTotal:F2}€\n" +
+                        $"Marge brute: {result.MargeBrutePct:F2}%\n" +
+                        $"Marge nette: {result.MargeNettePct:F2}%",
+                        "Résultat", 
+                        MessageBoxButton.OK, 
+                        MessageBoxImage.Information);
+                }
+
                 _resultsList.Add(result);
                 _undoRedoManager.Push(result);
                 AfficherResultats(result);
-
                 txtDebourse.Text = result.DebourseSec.ToString("F2");
-                MessageBox.Show($"Calcul inversé:\nDéboursé sec max: {result.DebourseSec:F2}€", "Résultat", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
