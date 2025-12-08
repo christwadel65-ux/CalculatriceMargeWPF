@@ -46,7 +46,7 @@ namespace CalculatriceMargeWPF
             // Configurer les séparateurs de milliers pour les champs numériques
             NumberFormatter.SetupThousandsSeparatorTextBox(txtDebourse);
             NumberFormatter.SetupThousandsSeparatorTextBox(txtVente);
-            NumberFormatter.SetupThousandsSeparatorTextBox(txtFrais);
+            NumberFormatter.SetupThousandsSeparatorTextBoxNoDecimals(txtFrais);  // Pas de décimales pour Frais
             NumberFormatter.SetupThousandsSeparatorTextBox(txtTVA);
             NumberFormatter.SetupThousandsSeparatorTextBox(txtRevient);
             

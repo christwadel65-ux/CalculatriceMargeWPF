@@ -9,36 +9,71 @@ namespace CalculatriceMargeWPF.Helpers
     /// </summary>
     public static class NumberFormatter
     {
-    /// <summary>
-    /// Configure un TextBox pour accepter et afficher les nombres avec séparateurs de milliers
-    /// </summary>
-    public static void SetupThousandsSeparatorTextBox(TextBox textBox)
-    {
-        textBox.PreviewTextInput += (s, e) =>
+        /// <summary>
+        /// Configure un TextBox pour accepter et afficher les nombres avec séparateurs de milliers
+        /// </summary>
+        public static void SetupThousandsSeparatorTextBox(TextBox textBox)
         {
-            // Permettre les chiffres, virgule, point, tiret
-            e.Handled = !IsValidNumberChar(e.Text);
-        };
-
-        // Utiliser LostFocus plutôt que TextChanged pour éviter les boucles infinies
-        textBox.LostFocus += (s, e) =>
-        {
-            if (string.IsNullOrWhiteSpace(textBox.Text))
-                return;
-
-            // Essayer de parser et reformater
-            string cleanedText = CleanNumberInput(textBox.Text);
-            if (double.TryParse(cleanedText, CultureInfo.InvariantCulture, out double value))
+            textBox.PreviewTextInput += (s, e) =>
             {
-                // Formater avec séparateurs de milliers
-                string formatted = FormatNumber(value);
-                if (formatted != textBox.Text)
+                // Permettre les chiffres, virgule, point, tiret
+                e.Handled = !IsValidNumberChar(e.Text);
+            };
+
+            // Utiliser LostFocus plutôt que TextChanged pour éviter les boucles infinies
+            textBox.LostFocus += (s, e) =>
+            {
+                if (string.IsNullOrWhiteSpace(textBox.Text))
+                    return;
+
+                // Essayer de parser et reformater
+                string cleanedText = CleanNumberInput(textBox.Text);
+                if (double.TryParse(cleanedText, CultureInfo.InvariantCulture, out double value))
                 {
-                    textBox.Text = formatted;
+                    // Formater avec séparateurs de milliers
+                    string formatted = FormatNumber(value);
+                    if (formatted != textBox.Text)
+                    {
+                        textBox.Text = formatted;
+                    }
                 }
-            }
-        };
-    }        /// <summary>
+            };
+        }
+
+        /// <summary>
+        /// Configure un TextBox pour accepter et afficher les nombres SANS décimales
+        /// </summary>
+        public static void SetupThousandsSeparatorTextBoxNoDecimals(TextBox textBox)
+        {
+            textBox.PreviewTextInput += (s, e) =>
+            {
+                // Permettre les chiffres et tiret, mais pas de virgule/point
+                e.Handled = !IsValidNumberCharNoDecimals(e.Text);
+            };
+
+            // Utiliser LostFocus pour éviter les boucles infinies
+            textBox.LostFocus += (s, e) =>
+            {
+                if (string.IsNullOrWhiteSpace(textBox.Text))
+                    return;
+
+                // Essayer de parser et reformater
+                string cleanedText = CleanNumberInput(textBox.Text);
+                if (double.TryParse(cleanedText, CultureInfo.InvariantCulture, out double value))
+                {
+                    // Arrondir à l'entier le plus proche
+                    value = Math.Round(value, 0);
+                    // Formater SANS décimales
+                    string formatted = FormatNumberNoDecimals(value);
+                    if (formatted != textBox.Text)
+                    {
+                        textBox.Text = formatted;
+                    }
+                }
+            };
+        }
+
+        /// <summary>
         /// Nettoie une entrée utilisateur en supprimant les séparateurs
         /// </summary>
         public static string CleanNumberInput(string input)
@@ -100,6 +135,15 @@ namespace CalculatriceMargeWPF.Helpers
         }
 
         /// <summary>
+        /// Formate un nombre SANS décimales avec séparateurs de milliers
+        /// </summary>
+        public static string FormatNumberNoDecimals(double value)
+        {
+            // Formater sans décimales et séparateurs d'espaces pour les milliers
+            return value.ToString("#,##0", new CultureInfo("fr-FR"));
+        }
+
+        /// <summary>
         /// Vérifie si un caractère est valide pour une entrée numérique
         /// </summary>
         private static bool IsValidNumberChar(string text)
@@ -111,6 +155,23 @@ namespace CalculatriceMargeWPF.Helpers
             foreach (char c in text)
             {
                 if (!char.IsDigit(c) && c != ',' && c != '.' && c != '-')
+                    return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Vérifie si un caractère est valide pour une entrée numérique SANS décimales
+        /// </summary>
+        private static bool IsValidNumberCharNoDecimals(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return false;
+
+            // Accepter seulement les chiffres et le tiret
+            foreach (char c in text)
+            {
+                if (!char.IsDigit(c) && c != '-')
                     return false;
             }
             return true;
