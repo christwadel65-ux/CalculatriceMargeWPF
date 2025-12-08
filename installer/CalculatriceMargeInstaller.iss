@@ -36,13 +36,13 @@ PrivilegesRequired=lowest
 ArchitecturesInstallIn64BitMode=x64 arm64
 ArchitecturesAllowed=x64 arm64 x86
 
-; Langue par défaut (fallback si French.isl non présent)
-DefaultLanguage=english
+; Langue par défaut (codes courts en/en-US)
+DefaultLanguage=en
 LanguageDetectionMethod=uilanguage
 
 [Languages]
-Name: "french"; MessagesFile: "compiler:Languages\French.isl"
-Name: "english"; MessagesFile: "compiler:Default.isl"
+Name: "fr"; MessagesFile: "compiler:Languages\French.isl"
+Name: "en"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
