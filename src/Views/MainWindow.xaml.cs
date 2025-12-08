@@ -641,16 +641,19 @@ namespace CalculatriceMargeWPF
         private void MenuAbout_Click(object sender, RoutedEventArgs e)
         {
             string message = "Calculatrice de Marge\n\n" +
-                           "Version : 1.0.6\n" +
+                           "Version : 2.0\n" +
                            "Développé avec WPF (.NET 10)\n\n" +
                            "Application professionnelle de calcul de marge commerciale.\n\n" +
                            "Fonctionnalités :\n" +
                            "• Calcul automatique des marges brute et nette\n" +
+                           "• Calcul inversé : déterminer le prix de vente à partir de la marge souhaitée\n" +
                            "• Gestion flexible des frais généraux (% ou €)\n" +
                            "• Historique intelligent avec rechargement et rétrocompatibilité\n" +
                            "• Préconfigurations rapides (Standard, Réduit, Service)\n" +
                            "• Récap rapide : Déboursé sec, Prix HT, Prix TTC\n" +
-                           "• Export et sauvegarde automatique avec permissions sécurisées\n" +
+                           "• Statistiques détaillées et analyses\n" +
+                           "• Export CSV et génération de rapports HTML\n" +
+                           "• Undo/Redo (Ctrl+Z, Ctrl+Y)\n" +
                            "• Interface moderne avec thème sombre/clair\n" +
                            "• Séparateurs de milliers et formatage professionnel\n\n" +
                            "© 2025 C. Lecomte - Tous droits réservés";
