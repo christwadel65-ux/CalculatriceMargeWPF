@@ -32,12 +32,11 @@ WizardStyle=modern
 PrivilegesRequired=lowest
 ArchitecturesInstallIn64BitMode=x64 arm64
 ArchitecturesAllowed=x64 arm64 x86
-DefaultLanguage=en
 LanguageDetectionMethod=uilanguage
 
 [Languages]
-Name: "fr"; MessagesFile: "compiler:Languages\French.isl"
-Name: "en"; MessagesFile: "compiler:Default.isl"
+Name: "english"; MessagesFile: "compiler:Default.isl"
+Name: "french"; MessagesFile: "compiler:Languages\French.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
