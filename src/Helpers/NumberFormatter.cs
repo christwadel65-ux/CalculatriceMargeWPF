@@ -9,40 +9,36 @@ namespace CalculatriceMargeWPF.Helpers
     /// </summary>
     public static class NumberFormatter
     {
-        /// <summary>
-        /// Configure un TextBox pour accepter et afficher les nombres avec séparateurs de milliers
-        /// </summary>
-        public static void SetupThousandsSeparatorTextBox(TextBox textBox)
+    /// <summary>
+    /// Configure un TextBox pour accepter et afficher les nombres avec séparateurs de milliers
+    /// </summary>
+    public static void SetupThousandsSeparatorTextBox(TextBox textBox)
+    {
+        textBox.PreviewTextInput += (s, e) =>
         {
-            textBox.PreviewTextInput += (s, e) =>
-            {
-                // Permettre les chiffres, virgule, point, tiret
-                e.Handled = !IsValidNumberChar(e.Text);
-            };
+            // Permettre les chiffres, virgule, point, tiret
+            e.Handled = !IsValidNumberChar(e.Text);
+        };
 
-            textBox.TextChanged += (s, e) =>
-            {
-                if (string.IsNullOrWhiteSpace(textBox.Text))
-                    return;
+        // Utiliser LostFocus plutôt que TextChanged pour éviter les boucles infinies
+        textBox.LostFocus += (s, e) =>
+        {
+            if (string.IsNullOrWhiteSpace(textBox.Text))
+                return;
 
-                // Essayer de parser et reformater
-                string cleanedText = CleanNumberInput(textBox.Text);
-                if (double.TryParse(cleanedText, CultureInfo.InvariantCulture, out double value))
+            // Essayer de parser et reformater
+            string cleanedText = CleanNumberInput(textBox.Text);
+            if (double.TryParse(cleanedText, CultureInfo.InvariantCulture, out double value))
+            {
+                // Formater avec séparateurs de milliers
+                string formatted = FormatNumber(value);
+                if (formatted != textBox.Text)
                 {
-                    // Formater avec séparateurs de milliers
-                    string formatted = FormatNumber(value);
-                    if (formatted != textBox.Text)
-                    {
-                        int cursorPos = textBox.SelectionStart;
-                        textBox.Text = formatted;
-                        // Repositionner le curseur
-                        textBox.SelectionStart = Math.Min(cursorPos, textBox.Text.Length);
-                    }
+                    textBox.Text = formatted;
                 }
-            };
-        }
-
-        /// <summary>
+            }
+        };
+    }        /// <summary>
         /// Nettoie une entrée utilisateur en supprimant les séparateurs
         /// </summary>
         public static string CleanNumberInput(string input)
@@ -100,7 +96,7 @@ namespace CalculatriceMargeWPF.Helpers
         public static string FormatNumber(double value)
         {
             // Formater avec 2 décimales et séparateurs d'espaces pour les milliers
-            return value.ToString("#,##0.##", new CultureInfo("fr-FR"));
+            return value.ToString("#,##0.00", new CultureInfo("fr-FR"));
         }
 
         /// <summary>
