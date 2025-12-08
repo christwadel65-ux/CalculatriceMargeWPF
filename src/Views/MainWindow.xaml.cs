@@ -37,6 +37,10 @@ namespace CalculatriceMargeWPF
             cmbFraisMode.SelectedIndex = 0;
             cmbPresets.SelectedIndex = 0;
             
+            // Vider explicitement les champs
+            txtDebourse.Clear();
+            txtVente.Clear();
+            
             // Support clavier
             this.KeyDown += MainWindow_KeyDown;
         }
