@@ -31,7 +31,7 @@ namespace CalculatriceMargeWPF
             ChargerPresets();
             
             // Initialiser les valeurs par défaut
-            txtDebourse.Text = "0";
+            // txtDebourse et txtVente restent vides par défaut
             txtTVA.Text = "20";
             txtFrais.Text = "10";
             cmbFraisMode.SelectedIndex = 0;
