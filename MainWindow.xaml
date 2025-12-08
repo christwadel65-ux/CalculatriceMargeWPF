@@ -223,9 +223,17 @@
 
                 <!-- Boutons -->
                 <Border Style="{StaticResource Card}" Grid.Row="2">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Button x:Name="btnCalculer" Content="Calculer" Width="140" Margin="10" Background="#2D9CDB" Foreground="White" FontWeight="Bold" Click="btnCalculer_Click"/>
-                        <Button x:Name="btnReset" Content="Réinitialiser" Width="140" Margin="10" Background="#6C7A89" Foreground="White" FontWeight="Bold" Click="btnReset_Click"/>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+                            <Button x:Name="btnCalculer" Content="Calculer" Width="120" Margin="5" Background="#2D9CDB" Foreground="White" FontWeight="Bold" Click="btnCalculer_Click"/>
+                            <Button x:Name="btnCalculInverse" Content="Calcul Inversé" Width="140" Margin="5" Background="#9B59B6" Foreground="White" FontWeight="Bold" Click="btnCalculInverse_Click"/>
+                            <Button x:Name="btnReset" Content="Réinitialiser" Width="120" Margin="5" Background="#6C7A89" Foreground="White" FontWeight="Bold" Click="btnReset_Click"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Button x:Name="btnStatistiques" Content="📊 Statistiques" Width="140" Margin="5" Background="#16A085" Foreground="White" FontWeight="Bold" Click="btnStatistiques_Click"/>
+                            <Button x:Name="btnExportCSV" Content="📥 Export CSV" Width="140" Margin="5" Background="#2980B9" Foreground="White" FontWeight="Bold" Click="btnExportCSV_Click"/>
+                            <Button x:Name="btnExportHTML" Content="📄 Rapport HTML" Width="140" Margin="5" Background="#D35400" Foreground="White" FontWeight="Bold" Click="btnExportHTML_Click"/>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
 
