@@ -12,6 +12,14 @@ namespace CalculatriceMargeWPF.Models
     public class ExportManager
     {
         /// <summary>
+        /// Format une ligne de statistiques (réutilisable CSV et HTML)
+        /// </summary>
+        private static (double moyenne, double min, double max, double écartType) FormatStatLine(string label, double moyenne, double min, double max, double écartType)
+        {
+            return (moyenne, min, max, écartType);
+        }
+
+        /// <summary>
         /// Exporte l'historique en CSV
         /// </summary>
         public static void ExportToCSV(IEnumerable<CalculationEngine.CalculationResult> results, string filePath)

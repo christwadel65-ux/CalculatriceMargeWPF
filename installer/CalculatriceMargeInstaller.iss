@@ -1,8 +1,8 @@
-; Inno Setup Script - Calculatrice de Marge v2.0.0
-; Regenerated installer script
+; Inno Setup Script - Calculatrice de Marge v2.1.0
+; Optimisations de performance et refactoring SOLID
 
 #define MyAppName "Calculatrice de Marge"
-#define MyAppVersion "2.0.0"
+#define MyAppVersion "2.1.0"
 #define MyAppPublisher "C. Lecomte"
 #define MyAppURL "https://github.com/christwadel65-ux/CalculatriceMarge"
 #define MyAppExeName "CalculatriceMargeWPF.exe"
@@ -41,7 +41,6 @@ Name: "french"; MessagesFile: "compiler:Languages\French.isl"
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "startup"; Description: "Lancer l'application au démarrage"; GroupDescription: "Options de démarrage"
 
 [Files]
 ; Core application

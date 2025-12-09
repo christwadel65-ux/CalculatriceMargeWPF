@@ -14,11 +14,21 @@ namespace CalculatriceMargeWPF
 {
     public partial class MainWindow : Window
     {
+        // Constantes
+        private const string DEFAULT_TITLE = "Sans titre";
+        private const string HISTORIQUE_FOLDER = "CalculatriceMarge";
+        private const string HISTORIQUE_SUBFOLDER = "Historique";
+        private const string HISTORIQUE_FILENAME = "historique.txt";
+
         private string historiquePath = "Historique/historique.txt";
         private CalculationEngine _engine;
         private UndoRedoManager _undoRedoManager;
         private PresetManager _presetManager;
         private List<CalculationEngine.CalculationResult> _resultsList;
+        private LocalizationManager _localizationManager;
+        private ThemeManager _themeManager;
+        private PreferencesManager _preferencesManager;
+        private System.Windows.Threading.DispatcherTimer _autoSaveTimer;
 
         public MainWindow()
         {
@@ -27,6 +37,14 @@ namespace CalculatriceMargeWPF
             _undoRedoManager = new UndoRedoManager();
             _presetManager = new PresetManager();
             _resultsList = new List<CalculationEngine.CalculationResult>();
+            
+            // Initialiser les gestionnaires
+            _localizationManager = LocalizationManager.Instance;
+            _themeManager = ThemeManager.Instance;
+            _preferencesManager = PreferencesManager.Instance;
+            
+            // Charger les préférences
+            LoadPreferences();
             
             EnsureHistoriqueFolder();
             ChargerHistorique();
@@ -52,6 +70,43 @@ namespace CalculatriceMargeWPF
             
             // Support clavier
             this.KeyDown += MainWindow_KeyDown;
+            
+            // Initialiser l'auto-save
+            InitializeAutoSave();
+        }
+
+        private void LoadPreferences()
+        {
+            string savedTheme = _preferencesManager.GetTheme();
+            _themeManager.SetTheme(savedTheme);
+            _themeManager.OnThemeChanged += () => ApplyTheme();
+            ApplyTheme();
+
+            string savedLanguage = _preferencesManager.GetLanguage();
+            _localizationManager.SetLanguage(savedLanguage);
+        }
+
+        private void InitializeAutoSave()
+        {
+            if (!_preferencesManager.GetAutoSaveEnabled())
+                return;
+
+            _autoSaveTimer = new System.Windows.Threading.DispatcherTimer();
+            _autoSaveTimer.Interval = TimeSpan.FromSeconds(_preferencesManager.GetAutoSaveInterval());
+            _autoSaveTimer.Tick += (s, e) => AutoSaveHistorique();
+            _autoSaveTimer.Start();
+        }
+
+        private void AutoSaveHistorique()
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(txtTitre.Text) && lstHistorique.Items.Count > 0)
+                {
+                    // Auto-save logic already handled in btnCalculer_Click
+                }
+            }
+            catch { }
         }
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
@@ -71,6 +126,16 @@ namespace CalculatriceMargeWPF
                 ExecuteRedo();
                 e.Handled = true;
             }
+            else if (e.Key == Key.S && (Keyboard.Modifiers & ModifierKeys.Control) != 0) // Ctrl+S pour sauvegarder
+            {
+                MenuSauvegarder_Click(null, null);
+                e.Handled = true;
+            }
+            else if (e.Key == Key.N && (Keyboard.Modifiers & ModifierKeys.Control) != 0) // Ctrl+N pour nouveau
+            {
+                btnReset_Click(null, null);
+                e.Handled = true;
+            }
         }
 
         private void ChargerPresets()
@@ -86,12 +151,12 @@ namespace CalculatriceMargeWPF
         {
             // Utiliser AppData pour éviter les problèmes de permissions dans Program Files
             string appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            string dossier = Path.Combine(appDataFolder, "CalculatriceMarge", "Historique");
+            string dossier = Path.Combine(appDataFolder, HISTORIQUE_FOLDER, HISTORIQUE_SUBFOLDER);
             if (!Directory.Exists(dossier))
             {
                 Directory.CreateDirectory(dossier);
             }
-            historiquePath = Path.Combine(dossier, "historique.txt");
+            historiquePath = Path.Combine(dossier, HISTORIQUE_FILENAME);
         }
 
         private void ChargerHistorique()
@@ -117,7 +182,7 @@ namespace CalculatriceMargeWPF
                 var result = _engine.Calculate(debourseSec, prixVenteHT, tva, fraisGenerauxPct, fraisEnPourcent);
                 
                 // Récupérer le titre
-                result.Titre = string.IsNullOrWhiteSpace(txtTitre.Text) ? "Sans titre" : txtTitre.Text;
+                result.Titre = string.IsNullOrWhiteSpace(txtTitre.Text) ? DEFAULT_TITLE : txtTitre.Text;
                 
                 // Vérifier les doublons
                 bool titreExiste = _resultsList.Any(r => r.Titre == result.Titre);
@@ -232,7 +297,7 @@ namespace CalculatriceMargeWPF
                     fraisGeneraux = 10;
 
                 var result = _engine.CalculateInverse(prixVente, margeTarget, tva, fraisEnPourcent, fraisGeneraux);
-                result.Titre = string.IsNullOrWhiteSpace(txtTitre.Text) ? "Sans titre (inversé)" : $"{txtTitre.Text} (inversé)";
+                result.Titre = string.IsNullOrWhiteSpace(txtTitre.Text) ? $"{DEFAULT_TITLE} (inversé)" : $"{txtTitre.Text} (inversé)";
 
                 // Vérifier la contrainte de marge brute si définie
                 if (margeBruteMin.HasValue && result.MargeBrutePct < margeBruteMin.Value)
@@ -477,95 +542,21 @@ namespace CalculatriceMargeWPF
 
             string item = lstHistorique.SelectedItem.ToString();
             
-            // Parse la ligne d'historique - gère l'ancien format (sans MODE) et le nouveau (avec MODE)
-            var parts = item.Split('|');
-            if (parts.Length < 8) return;
+            // Utiliser le parser d'historique pour extraire les valeurs
+            if (!HistoryParser.TryParseHistoryLine(item, out var entry))
+            {
+                MessageBox.Show("Impossible de charger ce calcul.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
 
             try
             {
-                // Extraire le titre
-                string titre = parts[1].Trim();
-                txtTitre.Text = titre;
-                
-                // Extraire DS (déboursé sec)
-                string dsPart = parts[2].Trim().Replace("DS:", "").Trim();
-                if (double.TryParse(dsPart, out double ds))
-                {
-                    txtDebourse.Text = ds.ToString("F2");
-                }
-                
-                // Extraire FG (frais généraux)
-                string fgPart = parts[3].Trim().Replace("FG:", "").Trim();
-                double fg = 0;
-                if (double.TryParse(fgPart, out fg))
-                {
-                    // Vérifier si c'est du nouveau format (avec MODE) ou ancien (sans MODE)
-                    string part4Content = parts[4].Trim();
-                    
-                    if (part4Content.StartsWith("MODE:"))
-                    {
-                        // Nouveau format : FG est la valeur brute (25 pour 25%)
-                        txtFrais.Text = fg.ToString("F2");
-                        
-                        // Extraire MODE
-                        string modePart = part4Content.Replace("MODE:", "").Trim();
-                        if (modePart == "%")
-                        {
-                            cmbFraisMode.SelectedIndex = 0;
-                        }
-                        else if (modePart == "EUR")
-                        {
-                            cmbFraisMode.SelectedIndex = 1;
-                        }
-                        
-                        // Extraire HT depuis parts[6]
-                        string htPart = parts[6].Trim().Replace("HT:", "").Trim();
-                        htPart = System.Text.RegularExpressions.Regex.Replace(htPart, @"[^\d,\.]", "");
-                        htPart = htPart.Replace(",", ".");
-                        if (double.TryParse(htPart, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double ht))
-                        {
-                            txtVente.Text = ht.ToString("F2");
-                        }
-                        
-                        // Extraire TVA depuis parts[8]
-                        string tvaPart = parts[8].Trim().Replace("TVA:", "").Replace("%", "").Trim();
-                        if (double.TryParse(tvaPart, out double tva))
-                        {
-                            txtTVA.Text = tva.ToString("F2");
-                        }
-                    }
-                    else if (part4Content.StartsWith("PR:"))
-                    {
-                        // Ancien format (pas de MODE) : FG est la valeur en euros, on doit retrouver le %
-                        // On récupère DS et on calcule le % : fg_pct = (fg / ds) * 100
-                        if (ds > 0)
-                        {
-                            double fgPct = (fg / ds) * 100;
-                            txtFrais.Text = fgPct.ToString("F2");
-                            cmbFraisMode.SelectedIndex = 0; // Mode % par défaut pour ancien format
-                        }
-                        else
-                        {
-                            txtFrais.Text = fg.ToString("F2");
-                        }
-                        
-                        // Extraire HT depuis parts[5]
-                        string htPart = parts[5].Trim().Replace("HT:", "").Trim();
-                        htPart = System.Text.RegularExpressions.Regex.Replace(htPart, @"[^\d,\.]", "");
-                        htPart = htPart.Replace(",", ".");
-                        if (double.TryParse(htPart, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double ht))
-                        {
-                            txtVente.Text = ht.ToString("F2");
-                        }
-                        
-                        // Extraire TVA depuis parts[7]
-                        string tvaPart = parts[7].Trim().Replace("TVA:", "").Replace("%", "").Trim();
-                        if (double.TryParse(tvaPart, out double tva))
-                        {
-                            txtTVA.Text = tva.ToString("F2");
-                        }
-                    }
-                }
+                txtTitre.Text = entry.Titre;
+                txtDebourse.Text = entry.DebourseSec.ToString("F2");
+                txtFrais.Text = entry.FraisGeneraux.ToString("F2");
+                txtVente.Text = entry.PrixVente.ToString("F2");
+                txtTVA.Text = entry.TVA.ToString("F2");
+                cmbFraisMode.SelectedIndex = entry.FraisModeIndex;
 
                 MessageBox.Show("Calcul rechargé depuis l'historique. Cliquez sur 'Calculer' pour voir les résultats.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
             }
@@ -629,47 +620,123 @@ namespace CalculatriceMargeWPF
         private void MenuToggleDarkMode_Click(object sender, RoutedEventArgs e)
         {
             isDarkMode = !isDarkMode;
-            mnuThemeToggle.Header = isDarkMode ? "Mode clair" : "Mode sombre";
             ApplyTheme();
         }
 
         private void ApplyTheme()
         {
-            if (isDarkMode)
+            var theme = _themeManager.CurrentTheme;
+            var bgBrush = new System.Windows.Media.SolidColorBrush(theme.BackgroundColor);
+            var fgBrush = new System.Windows.Media.SolidColorBrush(theme.ForegroundColor);
+            
+            this.Background = bgBrush;
+            this.Foreground = fgBrush;
+            
+            UpdateMenuColors();
+        }
+
+        private void MenuTheme_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.MenuItem menuItem && menuItem.Tag is string themeName)
             {
-                this.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 15, 20, 25));
-                this.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 232, 238, 247));
+                _themeManager.SetTheme(themeName);
+                _preferencesManager.SetTheme(themeName);
+                ApplyTheme();
+                UpdateMenuColors();
             }
-            else
+        }
+
+        private void MenuLanguage_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.MenuItem menuItem && menuItem.Tag is string languageCode)
             {
-                this.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 230, 234, 242));
-                this.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 28, 42, 68));
+                _localizationManager.SetLanguage(languageCode);
+                _preferencesManager.SetLanguage(languageCode);
+                UpdateUILanguage();
+            }
+        }
+
+        private void UpdateMenuColors()
+        {
+            // Les styles XAML gèrent déjà les couleurs du menu
+            // Pas besoin de mise à jour en code-behind
+        }
+
+        private void UpdateUILanguage()
+        {
+            // Cette fonction peut être étendue pour mettre à jour tous les textes dynamiquement
+            // Pour l'instant, un redémarrage de l'application est recommandé
+            MessageBox.Show("La langue sera changée au prochain démarrage de l'application.", "Langue", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void MenuPreferences_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Fenêtre de préférences en cours de développement.\n\nPréférences actuelles :\n" +
+                $"• Thème : {_themeManager.CurrentTheme.Name}\n" +
+                $"• Langue : {_localizationManager.CurrentLanguage}\n" +
+                $"• Auto-save : {_preferencesManager.GetAutoSaveEnabled()}\n" +
+                $"• Intervalle auto-save : {_preferencesManager.GetAutoSaveInterval()}s",
+                "Préférences", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private string GetInternetExplorerPath()
+        {
+            string[] candidates =
+            {
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Internet Explorer", "iexplore.exe"),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Internet Explorer", "iexplore.exe")
+            };
+
+            return candidates.FirstOrDefault(File.Exists) ?? string.Empty;
+        }
+
+        private void OpenMarkdownWithInternetExplorer(string target)
+        {
+            string iePath = GetInternetExplorerPath();
+            if (string.IsNullOrWhiteSpace(iePath))
+            {
+                MessageBox.Show("Internet Explorer est introuvable sur ce poste.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            string resolvedTarget = target;
+            if (!Uri.TryCreate(target, UriKind.Absolute, out Uri uri) || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+            {
+                if (!File.Exists(target))
+                {
+                    MessageBox.Show($"Le fichier demandé est introuvable : {target}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                resolvedTarget = new Uri(Path.GetFullPath(target)).AbsoluteUri;
+            }
+
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = iePath,
+                    Arguments = resolvedTarget,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Impossible d'ouvrir le contenu Markdown dans Internet Explorer : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private void MenuGuide_Click(object sender, RoutedEventArgs e)
         {
-            string readmePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "README.md");
-            
-            if (File.Exists(readmePath))
-            {
-                try
-                {
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                    {
-                        FileName = readmePath,
-                        UseShellExecute = true
-                    });
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Impossible d'ouvrir le guide : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-            else
-            {
-                MessageBox.Show("Le fichier README.md n'a pas été trouvé.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            // Ouvrir le guide local (README.md) dans Internet Explorer
+            string readmePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "docs", "README.md");
+            OpenMarkdownWithInternetExplorer(readmePath);
+        }
+
+        private void MenuImplementationSummary_Click(object sender, RoutedEventArgs e)
+        {
+            string summaryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "docs", "guides", "IMPLEMENTATION_SUMMARY.md");
+            OpenMarkdownWithInternetExplorer(summaryPath);
         }
 
         private void MenuAbout_Click(object sender, RoutedEventArgs e)

@@ -89,7 +89,6 @@ namespace CalculatriceMargeWPF.Models
             double prixRevientMax = prixVenteSouhaite * (1 - margeNetteTargetPct / 100);
 
             // Déboursé = PR - Frais
-            double fraisEnEuro;
             double debourseSec;
 
             if (fraisEnPourcent)
@@ -102,7 +101,6 @@ namespace CalculatriceMargeWPF.Models
                 // DS + FG = PR
                 debourseSec = prixRevientMax - fraisGeneraux;
             }
-
             // Recalculer pour confirmer
             return Calculate(debourseSec, prixVenteSouhaite, tva, fraisGeneraux, fraisEnPourcent);
         }
@@ -148,45 +146,25 @@ namespace CalculatriceMargeWPF.Models
             if (results == null || results.Length == 0)
                 throw new ArgumentException("Aucun résultat à analyser");
 
+            // Utiliser LINQ pour les calculs (plus efficace et lisible)
             var stats = new Statistics
             {
                 NombreCalculs = results.Length,
-                ChiffreAffairesTotal = 0,
-                MargeNetteEuroTotal = 0
+                MoyenneMargeBrutePct = results.Average(r => r.MargeBrutePct),
+                MoyenneMargeNettePct = results.Average(r => r.MargeNettePct),
+                MinMargeBrutePct = results.Min(r => r.MargeBrutePct),
+                MaxMargeBrutePct = results.Max(r => r.MargeBrutePct),
+                MinMargeNettePct = results.Min(r => r.MargeNettePct),
+                MaxMargeNettePct = results.Max(r => r.MargeNettePct),
+                ChiffreAffairesTotal = results.Sum(r => r.PrixVenteTTC),
+                MargeNetteEuroTotal = results.Sum(r => r.MargeNetteEuro)
             };
 
-            // Sommes
-            double sumMargeBrutePct = 0, sumMargeNettePct = 0;
-            double sumSqMargeBrutePct = 0, sumSqMargeNettePct = 0;
-            
-            stats.MinMargeBrutePct = results[0].MargeBrutePct;
-            stats.MaxMargeBrutePct = results[0].MargeBrutePct;
-            stats.MinMargeNettePct = results[0].MargeNettePct;
-            stats.MaxMargeNettePct = results[0].MargeNettePct;
-
-            foreach (var result in results)
-            {
-                sumMargeBrutePct += result.MargeBrutePct;
-                sumMargeNettePct += result.MargeNettePct;
-                sumSqMargeBrutePct += result.MargeBrutePct * result.MargeBrutePct;
-                sumSqMargeNettePct += result.MargeNettePct * result.MargeNettePct;
-
-                stats.MinMargeBrutePct = Math.Min(stats.MinMargeBrutePct, result.MargeBrutePct);
-                stats.MaxMargeBrutePct = Math.Max(stats.MaxMargeBrutePct, result.MargeBrutePct);
-                stats.MinMargeNettePct = Math.Min(stats.MinMargeNettePct, result.MargeNettePct);
-                stats.MaxMargeNettePct = Math.Max(stats.MaxMargeNettePct, result.MargeNettePct);
-
-                stats.ChiffreAffairesTotal += result.PrixVenteTTC;
-                stats.MargeNetteEuroTotal += result.MargeNetteEuro;
-            }
-
-            // Moyennes
-            stats.MoyenneMargeBrutePct = sumMargeBrutePct / results.Length;
-            stats.MoyenneMargeNettePct = sumMargeNettePct / results.Length;
-
-            // Écart-type
-            stats.EcartTypeMargeBrutePct = Math.Sqrt((sumSqMargeBrutePct / results.Length) - (stats.MoyenneMargeBrutePct * stats.MoyenneMargeBrutePct));
-            stats.EcartTypeMargeNettePct = Math.Sqrt((sumSqMargeNettePct / results.Length) - (stats.MoyenneMargeNettePct * stats.MoyenneMargeNettePct));
+            // Écart-type (variance corrigée)
+            double varianceMargeBrutePct = results.Average(r => r.MargeBrutePct * r.MargeBrutePct) - (stats.MoyenneMargeBrutePct * stats.MoyenneMargeBrutePct);
+            double varianceMargeNettePct = results.Average(r => r.MargeNettePct * r.MargeNettePct) - (stats.MoyenneMargeNettePct * stats.MoyenneMargeNettePct);
+            stats.EcartTypeMargeBrutePct = Math.Sqrt(Math.Max(0, varianceMargeBrutePct));
+            stats.EcartTypeMargeNettePct = Math.Sqrt(Math.Max(0, varianceMargeNettePct));
 
             return stats;
         }

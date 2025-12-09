@@ -84,8 +84,19 @@ namespace CalculatriceMargeWPF.Helpers
             // Supprimer les espaces et garder le point/virgule
             input = input.Replace(" ", "").Trim();
             
-            // Si la dernière partie commence par une virgule/point, c'est la décimale
-            // Exemple: 1 234,56 ou 1,234.56
+            // Normaliser à un format standard (utiliser . pour décimal)
+            return NormalizeSeparators(input);
+        }
+
+        /// <summary>
+        /// Normalise les séparateurs de milliers et décimaux
+        /// </summary>
+        private static string NormalizeSeparators(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return input;
+
+            // Si présence à la fois de virgule et point
             if (input.Contains(",") && input.Contains("."))
             {
                 // Déterminer lequel est le séparateur de milliers
@@ -95,12 +106,12 @@ namespace CalculatriceMargeWPF.Helpers
                 if (lastDot > lastComma)
                 {
                     // Format: 1,234.56 (point = décimale)
-                    input = input.Replace(",", "");
+                    return input.Replace(",", "");
                 }
                 else
                 {
                     // Format: 1.234,56 (virgule = décimale)
-                    input = input.Replace(".", "").Replace(",", ".");
+                    return input.Replace(".", "").Replace(",", ".");
                 }
             }
             else if (input.Contains(","))
@@ -113,12 +124,12 @@ namespace CalculatriceMargeWPF.Helpers
                 if (digitsAfter > 3)
                 {
                     // Séparateur de milliers
-                    input = input.Replace(",", "");
+                    return input.Replace(",", "");
                 }
                 else
                 {
                     // Décimal
-                    input = input.Replace(",", ".");
+                    return input.Replace(",", ".");
                 }
             }
 
