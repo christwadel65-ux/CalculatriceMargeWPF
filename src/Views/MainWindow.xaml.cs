@@ -742,7 +742,7 @@ namespace CalculatriceMargeWPF
         private void MenuAbout_Click(object sender, RoutedEventArgs e)
         {
             string message = "Calculatrice de Marge\n\n" +
-                           "Version : 2.0\n" +
+                           "Version : 2.1\n" +
                            "Développé avec WPF (.NET 10)\n\n" +
                            "Application professionnelle de calcul de marge commerciale.\n\n" +
                            "Fonctionnalités :\n" +

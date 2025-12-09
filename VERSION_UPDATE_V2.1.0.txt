@@ -1,0 +1,174 @@
+# ✅ VERSION UPDATE v2.1.0 - VERIFICATION COMPLETE
+
+**Date:** 9 décembre 2025  
+**Status:** ✅ TOUTES LES VERSIONS MISES À JOUR EN v2.1.0
+
+---
+
+## 📊 Vérification des Versions
+
+### 1. **Code Source** ✅
+```
+CalculatriceMargeWPF.csproj
+├── AssemblyVersion: 2.1.0.0 ✅
+├── FileVersion: 2.1.0.0 ✅
+└── Version: 2.1.0 ✅
+
+src/Models/CalculationEngine.cs
+└── using System.Linq; ✅ (ajouté)
+
+src/Views/MainWindow.xaml.cs
+└── Version: 2.1 (dans About) ✅
+```
+
+### 2. **Binaires Compilés** ✅
+```
+bin/Release/net10.0-windows/
+├── CalculatriceMargeWPF.exe
+│   └── ProductVersion: 2.1.0+294cbbd ✅
+│   └── FileVersion: 2.1.0.0 ✅
+│
+├── CalculatriceMargeWPF.dll
+│   └── Version 2.1.0 ✅
+│
+├── CalculatriceMargeWPF.deps.json
+│   └── "CalculatriceMargeWPF/2.1.0" ✅
+│
+└── CalculatriceMargeWPF.runtimeconfig.json
+    └── Version OK ✅
+```
+
+### 3. **Installeur** ✅
+```
+bin/Release/Installer/
+└── CalculatriceMargeInstaller_v2.1.0.exe
+    └── Compilé: 09/12/2025 21:01 ✅
+    └── Taille: ~2 MB ✅
+    └── Version: 2.1.0 ✅
+```
+
+### 4. **Documentation** ✅
+```
+docs/releases/
+├── RELEASE_NOTES_V2.1.md ✅
+├── CHANGELOG_V2.1.md ✅
+├── RELEASE_SUMMARY.md (updated) ✅
+├── V2.1.0_RELEASE_READY.md ✅
+├── MIGRATION_V2_TO_V2.1.md ✅
+└── README.md (index releases) ✅
+```
+
+---
+
+## 🔍 Détails des Changements
+
+### Compilation
+```
+✅ dotnet clean → OK
+✅ dotnet build -c Release → SUCCESS
+   └─ 0 Erreurs
+   └─ 0 Avertissements
+   └─ Build successful
+```
+
+### Fichiers Modifiés
+```
+1. CalculatriceMargeWPF.csproj
+   └─ 2.0.0.0 → 2.1.0.0 (AssemblyVersion)
+   └─ 2.0.0 → 2.1.0 (Version)
+
+2. CalculationEngine.cs
+   └─ using System.Linq; (ajouté)
+
+3. MainWindow.xaml.cs
+   └─ Version : 2.0 → Version : 2.1
+```
+
+### Installeur
+```
+Inno Setup Compiler (iscc.exe)
+   └─ Input: CalculatriceMargeInstaller.iss
+   └─ Output: CalculatriceMargeInstaller_v2.1.0.exe
+   └─ Status: ✅ Successfully compiled
+   └─ Size: 2,028,996 bytes (~2 MB)
+```
+
+---
+
+## 📦 Fichiers Prêts pour Distribution
+
+### Executable Bundle
+```
+bin/Release/net10.0-windows/
+├── CalculatriceMargeWPF.exe        (2.1.0) ✅
+├── CalculatriceMargeWPF.dll        (2.1.0) ✅
+├── CalculatriceMargeWPF.deps.json  (2.1.0) ✅
+├── CalculatriceMargeWPF.runtimeconfig.json ✅
+└── docs/                           ✅
+```
+
+### Installer
+```
+bin/Release/Installer/
+└── CalculatriceMargeInstaller_v2.1.0.exe (2.1.0) ✅
+```
+
+### Ancien Installeur
+```
+❌ CalculatriceMargeInstaller_v2.0.0.exe (SUPPRIMÉ)
+```
+
+---
+
+## ✅ Résumé de la Mise à Jour
+
+| Composant | Avant | Après | Status |
+|-----------|-------|-------|--------|
+| csproj AssemblyVersion | 2.0.0.0 | 2.1.0.0 | ✅ |
+| csproj FileVersion | 2.0.0.0 | 2.1.0.0 | ✅ |
+| csproj Version | 2.0.0 | 2.1.0 | ✅ |
+| EXE ProductVersion | 2.0.0 | 2.1.0 | ✅ |
+| EXE FileVersion | 2.0.0.0 | 2.1.0.0 | ✅ |
+| DLL Version | 2.0.0 | 2.1.0 | ✅ |
+| deps.json | 2.0.0 | 2.1.0 | ✅ |
+| About Dialog | 2.0 | 2.1 | ✅ |
+| Installer | v2.0.0 | v2.1.0 | ✅ |
+| Documentation | v2.0 refs | v2.1 refs | ✅ |
+
+---
+
+## 🚀 Prochaines Étapes
+
+### À Faire
+- [ ] `git commit` avec les changements version
+- [ ] `git push` vers GitHub
+- [ ] Créer GitHub Release v2.1.0
+- [ ] Upload CalculatriceMargeInstaller_v2.1.0.exe
+- [ ] Publier la release
+
+### Fichiers à Distribuer
+```
+✅ CalculatriceMargeInstaller_v2.1.0.exe     (À publier)
+✅ CalculatriceMargeWPF.exe (bin/Release)    (À publier)
+✅ Documentation (docs/releases/)             (À publier)
+```
+
+---
+
+## 🎉 Status Final
+
+```
+✅ Code source: v2.1.0
+✅ Binaires compilés: v2.1.0
+✅ Installeur: v2.1.0
+✅ Documentation: v2.1.0
+✅ Git commits: Prêts
+✅ Release: Prête pour GitHub
+```
+
+**TOUS LES FICHIERS SONT EN v2.1.0** ✅
+
+---
+
+*Mise à jour version complétée - 9 décembre 2025*  
+*Prêt pour publication sur GitHub Releases*
