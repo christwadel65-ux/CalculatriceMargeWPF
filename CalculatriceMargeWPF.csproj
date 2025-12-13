@@ -15,7 +15,18 @@
     <RepositoryUrl>https://github.com/christwadel65-ux/CalculatriceMarge</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <!-- Optimisations de taille pour WPF -->
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
+
+  <!-- Exclure les fichiers .pdb de la publication -->
+  <ItemGroup>
+    <Exclude Include="**/*.pdb" />
+  </ItemGroup>
   <ItemGroup>
     <Resource Include="src\Resources\Images\app_icon.png" />
     <None Update="docs\README.md">

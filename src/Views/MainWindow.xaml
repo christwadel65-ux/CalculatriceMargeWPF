@@ -1,381 +1,295 @@
 <Window x:Class="CalculatriceMargeWPF.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Calculatrice de Marge" Height="700" Width="660" Background="#E6EAF2" FontFamily="Bahnschrift"
-        Icon="../Resources/../Resources/Images/app_icon.png" ResizeMode="CanResize" WindowStartupLocation="CenterScreen" SizeToContent="Manual">
+        Title="Calculatrice de Marge" 
+        Height="720" Width="780" 
+        Background="#F0F3F7" 
+        FontFamily="Segoe UI"
+        WindowStartupLocation="CenterScreen">
+    
     <Window.Resources>
-        <Color x:Key="PrimaryColor">#1D3557</Color>
-        <!-- Accent aligné sur Primary pour éviter les bleus multiples dans les menus -->
-        <Color x:Key="AccentColor">#1D3557</Color>
-        <Color x:Key="SuccessColor">#27AE60</Color>
-        <Color x:Key="DangerColor">#E74C3C</Color>
-        <Color x:Key="WarningColor">#F39C12</Color>
-        <Color x:Key="CardStroke">#D8DFEC</Color>
-        <Color x:Key="CardFill">#F9FBFF</Color>
-
-        <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
-        <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
-        <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
-        <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource DangerColor}"/>
-        <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}"/>
-        <SolidColorBrush x:Key="CardStrokeBrush" Color="{StaticResource CardStroke}"/>
-        <SolidColorBrush x:Key="CardFillBrush" Color="{StaticResource CardFill}"/>
-
-        <!-- Override system brushes used by default MenuItem templates to enforce unified colors -->
-        <SolidColorBrush x:Key="{x:Static SystemColors.MenuBrushKey}" Color="{StaticResource CardFill}"/>
-        <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="{StaticResource CardFill}"/>
-        <SolidColorBrush x:Key="{x:Static SystemColors.ControlLightBrushKey}" Color="{StaticResource CardFill}"/>
-        <SolidColorBrush x:Key="{x:Static SystemColors.MenuTextBrushKey}" Color="{StaticResource PrimaryColor}"/>
-        <SolidColorBrush x:Key="{x:Static SystemColors.ControlTextBrushKey}" Color="{StaticResource PrimaryColor}"/>
-        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="{StaticResource PrimaryColor}"/>
-        <SolidColorBrush x:Key="{x:Static SystemColors.MenuHighlightBrushKey}" Color="{StaticResource PrimaryColor}"/>
-        <SolidColorBrush x:Key="{x:Static SystemColors.HotTrackBrushKey}" Color="{StaticResource PrimaryColor}"/>
-        <SolidColorBrush x:Key="{x:Static SystemColors.GradientActiveCaptionBrushKey}" Color="{StaticResource CardFill}"/>
-        <SolidColorBrush x:Key="{x:Static SystemColors.GradientInactiveCaptionBrushKey}" Color="{StaticResource CardFill}"/>
-        <SolidColorBrush x:Key="{x:Static SystemColors.ActiveCaptionBrushKey}" Color="{StaticResource CardFill}"/>
-        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveCaptionBrushKey}" Color="{StaticResource CardFill}"/>
-        <SolidColorBrush x:Key="{x:Static SystemColors.ControlLightLightBrushKey}" Color="{StaticResource CardFill}"/>
-        <SolidColorBrush x:Key="{x:Static SystemColors.ControlDarkBrushKey}" Color="{StaticResource CardFill}"/>
-        <SolidColorBrush x:Key="{x:Static SystemColors.ControlDarkDarkBrushKey}" Color="{StaticResource CardFill}"/>
-
-        <LinearGradientBrush x:Key="CardBackground" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#FFFFFF" Offset="0"/>
-            <GradientStop Color="#F5F7FB" Offset="1"/>
-        </LinearGradientBrush>
-
+        <SolidColorBrush x:Key="PrimaryBrush" Color="#3498DB"/>
+        <SolidColorBrush x:Key="SuccessBrush" Color="#2ECC71"/>
+        <SolidColorBrush x:Key="DangerBrush" Color="#E74C3C"/>
+        <SolidColorBrush x:Key="WarningBrush" Color="#F39C12"/>
+        <SolidColorBrush x:Key="InfoBrush" Color="#9B59B6"/>
+        <SolidColorBrush x:Key="GreyBrush" Color="#95A5A6"/>
+        
         <Style x:Key="Card" TargetType="Border">
-            <Setter Property="CornerRadius" Value="10"/>
-            <Setter Property="Background" Value="{StaticResource CardBackground}"/>
-            <Setter Property="Padding" Value="14"/>
-            <Setter Property="Margin" Value="0,8,0,0"/>
-            <Setter Property="BorderBrush" Value="{StaticResource CardStrokeBrush}"/>
-            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
             <Setter Property="Effect">
                 <Setter.Value>
-                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.12"/>
+                    <DropShadowEffect BlurRadius="6" ShadowDepth="1" Opacity="0.08"/>
                 </Setter.Value>
             </Setter>
         </Style>
-
-        <Style TargetType="Label">
-            <Setter Property="VerticalAlignment" Value="Center"/>
+        
+        <Style TargetType="TextBlock" x:Key="Label">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="#7F8C8D"/>
+            <Setter Property="Margin" Value="0,0,0,3"/>
+        </Style>
+        
+        <Style TargetType="TextBlock" x:Key="SectionTitle">
             <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Foreground" Value="#2C3E50"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
         </Style>
-
+        
         <Style TargetType="TextBox">
-            <Setter Property="Margin" Value="0"/>
-            <Setter Property="Padding" Value="8"/>
-            <Setter Property="BorderBrush" Value="#CCD4E0"/>
+            <Setter Property="Padding" Value="6,5"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="BorderBrush" Value="#D5DBDB"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
         </Style>
-
+        
         <Style TargetType="ComboBox">
             <Setter Property="Padding" Value="6"/>
-            <Setter Property="BorderBrush" Value="#CCD4E0"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
         </Style>
-
-        <Style TargetType="Button">
-            <Setter Property="Padding" Value="10,8"/>
+        
+        <Style x:Key="Btn" TargetType="Button">
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border CornerRadius="6" Background="{TemplateBinding Background}">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="4">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-            <Setter Property="Foreground" Value="White"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Opacity" Value="0.9"/>
                 </Trigger>
-                <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Opacity" Value="0.8"/>
-                </Trigger>
-                <Trigger Property="IsEnabled" Value="False">
-                    <Setter Property="Opacity" Value="0.6"/>
-                </Trigger>
             </Style.Triggers>
         </Style>
-
-        <Style TargetType="MenuItem">
-            <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Padding" Value="12,6"/>
-            <Setter Property="Background" Value="{StaticResource CardFillBrush}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource CardStrokeBrush}"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="MenuItem">
-                        <Grid>
-                            <Border x:Name="Border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" SnapsToDevicePixels="True">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <ContentPresenter x:Name="Icon" ContentSource="Icon" Margin="8,0" VerticalAlignment="Center" HorizontalAlignment="Center" SnapsToDevicePixels="True"/>
-                                    <ContentPresenter x:Name="HeaderHost" Grid.Column="1" ContentSource="Header" Margin="6,4" RecognizesAccessKey="True" VerticalAlignment="Center"/>
-                                    <Path x:Name="Arrow" Grid.Column="2" Margin="8,0,10,0" Fill="{TemplateBinding Foreground}" Data="M0,0 L0,6 L4,3 Z" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
-                                </Grid>
-                            </Border>
-                            <Popup x:Name="Popup" Placement="Right" IsOpen="{TemplateBinding IsSubmenuOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
-                                <Border Background="{StaticResource CardFillBrush}" BorderBrush="{StaticResource CardStrokeBrush}" BorderThickness="1" SnapsToDevicePixels="True">
-                                    <ScrollViewer CanContentScroll="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle"/>
-                                    </ScrollViewer>
-                                </Border>
-                            </Popup>
-                        </Grid>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="Role" Value="TopLevelHeader">
-                                <Setter TargetName="Popup" Property="Placement" Value="Bottom"/>
-                                <Setter TargetName="Arrow" Property="Visibility" Value="Collapsed"/>
-                            </Trigger>
-                            <Trigger Property="Role" Value="TopLevelItem">
-                                <Setter TargetName="Arrow" Property="Visibility" Value="Collapsed"/>
-                            </Trigger>
-                            <Trigger Property="Role" Value="SubmenuHeader">
-                                <Setter TargetName="Arrow" Property="Visibility" Value="Visible"/>
-                            </Trigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="{StaticResource PrimaryBrush}"/>
-                                <Setter Property="Foreground" Value="White"/>
-                                <Setter TargetName="Arrow" Property="Fill" Value="White"/>
-                            </Trigger>
-                            <Trigger Property="IsHighlighted" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="{StaticResource PrimaryBrush}"/>
-                                <Setter Property="Foreground" Value="White"/>
-                                <Setter TargetName="Arrow" Property="Fill" Value="White"/>
-                            </Trigger>
-                            <Trigger Property="IsSubmenuOpen" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="{StaticResource PrimaryBrush}"/>
-                                <Setter Property="Foreground" Value="White"/>
-                                <Setter TargetName="Arrow" Property="Fill" Value="White"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Opacity" Value="0.6"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Submenu style aliases the unified base style to keep references working -->
-        <Style TargetType="MenuItem" x:Key="SubmenuItemStyle" BasedOn="{StaticResource {x:Type MenuItem}}"/>
     </Window.Resources>
+
     <DockPanel>
-        <Menu DockPanel.Dock="Top" Background="{StaticResource CardFillBrush}" Foreground="{StaticResource PrimaryBrush}" FontWeight="SemiBold">
-            <MenuItem Header="Fichier">
+        <!-- Menu -->
+        <Menu DockPanel.Dock="Top" Background="White" Padding="5,3" FontSize="11">
+            <MenuItem Header="Fichier" Padding="8,4">
                 <MenuItem Header="Sauvegarder l'historique" Click="MenuSauvegarder_Click"/>
                 <MenuItem Header="Quitter" Click="MenuQuitter_Click"/>
             </MenuItem>
-            <MenuItem Header="Historique">
+            <MenuItem Header="Historique" Padding="8,4">
                 <MenuItem Header="Afficher/Masquer" Click="MenuHistorique_Click"/>
             </MenuItem>
-            <MenuItem Header="Affichage" ItemContainerStyle="{StaticResource SubmenuItemStyle}" Style="{StaticResource SubmenuItemStyle}">
-                <MenuItem Header="Thèmes" x:Name="mnuThemes" Style="{StaticResource SubmenuItemStyle}" ItemContainerStyle="{StaticResource SubmenuItemStyle}">
+            <MenuItem Header="Affichage" Padding="8,4">
+                <MenuItem Header="Thèmes">
                     <MenuItem Header="Clair" Click="MenuTheme_Click" Tag="Light"/>
                     <MenuItem Header="Sombre" Click="MenuTheme_Click" Tag="Dark"/>
-                    <MenuItem Header="Bleu" Click="MenuTheme_Click" Tag="Blue"/>
-                    <MenuItem Header="Vert" Click="MenuTheme_Click" Tag="Green"/>
                 </MenuItem>
-                <Separator/>
-                <MenuItem Header="Langue" x:Name="mnuLanguages" Style="{StaticResource SubmenuItemStyle}" ItemContainerStyle="{StaticResource SubmenuItemStyle}">
+                <MenuItem Header="Langue">
                     <MenuItem Header="Français" Click="MenuLanguage_Click" Tag="fr"/>
                     <MenuItem Header="English" Click="MenuLanguage_Click" Tag="en"/>
-                    <MenuItem Header="Español" Click="MenuLanguage_Click" Tag="es"/>
-                    <MenuItem Header="Deutsch" Click="MenuLanguage_Click" Tag="de"/>
                 </MenuItem>
-                <Separator/>
-                <MenuItem Header="Préférences" Click="MenuPreferences_Click" Style="{StaticResource SubmenuItemStyle}"/>
+                <MenuItem Header="Préférences" Click="MenuPreferences_Click"/>
             </MenuItem>
-            <MenuItem Header="Aide">
+            <MenuItem Header="Aide" Padding="8,4">
                 <MenuItem Header="Guide d'utilisation" Click="MenuGuide_Click"/>
-                <MenuItem Header="Résumé d'implémentation" Click="MenuImplementationSummary_Click"/>
                 <MenuItem Header="À propos" Click="MenuAbout_Click"/>
             </MenuItem>
         </Menu>
+
         <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <Grid Margin="16">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <!-- Zone saisies -->
-                <Border Style="{StaticResource Card}" Grid.Row="0">
+            <StackPanel Margin="8">
+                
+                <!-- TITRE -->
+                <Border Style="{StaticResource Card}">
                     <StackPanel>
-                        <TextBlock Text="Entrées" FontWeight="Bold" FontSize="15" Foreground="#1F2A44" Margin="0,0,0,6"/>
+                        <TextBlock Text="Titre" Style="{StaticResource Label}"/>
+                        <TextBox x:Name="txtTitre" Margin="0"/>
+                    </StackPanel>
+                </Border>
 
-                        <StackPanel Orientation="Horizontal" Margin="0,3">
-                            <Label Content="Titre du calcul:" Width="170" Foreground="#2C3E50" Padding="0,0,10,0"/>
-                            <TextBox x:Name="txtTitre" Width="240" ToolTip="Donnez un titre à ce calcul (ex: Produit A, Client XYZ)"/>
+                <!-- ENTRÉES ET PARAMÈTRES -->
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- GAUCHE: Entrées -->
+                    <Border Grid.Column="0" Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Text="Entrées" Style="{StaticResource SectionTitle}"/>
+                            <TextBlock Text="Déboursé sec (€)" Style="{StaticResource Label}"/>
+                            <TextBox x:Name="txtDebourse"/>
+                            <TextBlock Text="Prix revient (€)" Style="{StaticResource Label}"/>
+                            <TextBox x:Name="txtRevient" IsReadOnly="True" Background="#ECF0F1"/>
+                            <TextBlock Text="Prix vente HT (€)" Style="{StaticResource Label}"/>
+                            <TextBox x:Name="txtVente" TextChanged="txtVente_TextChanged"/>
+                            <TextBlock Text="Remise (%)" Style="{StaticResource Label}"/>
+                            <TextBox x:Name="txtRemise" Text="0" TextChanged="txtRemise_TextChanged"/>
+                            <TextBlock Text="Prix après remise (€)" Style="{StaticResource Label}"/>
+                            <TextBox x:Name="txtPrixApresRemise" IsReadOnly="True" Background="#ECF0F1" Margin="0"/>
                         </StackPanel>
+                    </Border>
 
-                        <UniformGrid Columns="1" Rows="5" Margin="0,2,0,0">
-                            <StackPanel Orientation="Horizontal" Margin="0,3">
-                                <Image Source="../Resources/Images/debourse.png" Width="20" Height="20" Margin="0,0,8,0"/>
-                                <Label Content="Déboursé sec (€):" Width="170" Foreground="#2C3E50" Padding="0,0,10,0"/>
-                                <TextBox x:Name="txtDebourse" Width="160" ToolTip="Coût hors frais généraux"/>
-                            </StackPanel>
-
-                            <StackPanel Orientation="Horizontal" Margin="0,3">
-                                <Image Source="../Resources/Images/revient.png" Width="20" Height="20" Margin="0,0,8,0"/>
-                                <Label Content="Prix de revient (€):" Width="170" Foreground="#2C3E50"/>
-                                <TextBox x:Name="txtRevient" Width="160" IsReadOnly="True" Background="#F3F5F9" ToolTip="Calculé automatiquement : déboursé sec + frais"/>
-                            </StackPanel>
-
-                            <StackPanel Orientation="Horizontal" Margin="0,6">
-                                <Image Source="../Resources/Images/revient.png" Width="20" Height="20" Margin="0,0,8,0"/>
-                                <Label Content="Prix de vente HT (€):" Width="170" Foreground="#2C3E50"/>
-                                <TextBox x:Name="txtVente" Width="160"/>
-                            </StackPanel>
-
-                            <StackPanel Orientation="Horizontal" Margin="0,6">
-                                <Image Source="../Resources/Images/frais.png" Width="20" Height="20" Margin="0,0,8,0"/>
-                                <Label Content="Frais generaux:" Width="170" Foreground="#2C3E50" ToolTip="Saisir en % ou en € selon le mode"/>
-                                <TextBox x:Name="txtFrais" Width="100" Text="10"/>
-                                <ComboBox x:Name="cmbFraisMode" Width="80" Margin="8,0,0,0" SelectedIndex="0">
+                    <!-- DROITE: Paramètres -->
+                    <Border Grid.Column="2" Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Text="Paramètres" Style="{StaticResource SectionTitle}"/>
+                            <TextBlock Text="Frais généraux" Style="{StaticResource Label}"/>
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="6"/>
+                                    <ColumnDefinition Width="60"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="txtFrais" Text="25" Grid.Column="0" Margin="0"/>
+                                <ComboBox x:Name="cmbFraisMode" Grid.Column="2" SelectedIndex="0" Margin="0">
                                     <ComboBoxItem Content="%"/>
                                     <ComboBoxItem Content="€"/>
                                 </ComboBox>
-                            </StackPanel>
-
-                            <StackPanel Orientation="Horizontal" Margin="0,6">
-                                <Image Source="../Resources/Images/tva.png" Width="20" Height="20" Margin="0,0,8,0"/>
-                                <Label Content="TVA (%):" Width="170" Foreground="#2C3E50" ToolTip="Taux de TVA appliqué sur le prix HT pour calculer le prix TTC"/>
-                                <TextBox x:Name="txtTVA" Width="160" Text="20"/>
-                            </StackPanel>
-                        </UniformGrid>
-                    </StackPanel>
-                </Border>
-
-                <Border Style="{StaticResource Card}" Grid.Row="1">
-                    <StackPanel>
-                        <TextBlock Text="Presets" FontWeight="Bold" FontSize="16" Foreground="#1F2A44" Margin="0,0,0,8"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,6">
-                            <ComboBox x:Name="cmbPresets" Width="240" SelectedIndex="0" ToolTip="Choisir un scénario rapide">
-                                <ComboBoxItem Content="Standard (TVA 20%, frais 25%)"/>
-                                <ComboBoxItem Content="Réduit (TVA 5.5%, frais 8%)"/>
-                                <ComboBoxItem Content="Service (TVA 10%, frais 15%)"/>
+                            </Grid>
+                            <TextBlock Text="TVA (%)" Style="{StaticResource Label}"/>
+                            <TextBox x:Name="txtTVA" Text="20"/>
+                            
+                            <TextBlock Text="Presets" Style="{StaticResource SectionTitle}" Margin="0,6,0,8"/>
+                            <ComboBox x:Name="cmbPresets" SelectedIndex="0">
+                                <ComboBoxItem Content="Standard (20% TVA, 25% FG)"/>
+                                <ComboBoxItem Content="Réduit (5.5% TVA, 8% FG)"/>
+                                <ComboBoxItem Content="Service (10% TVA, 15% FG)"/>
                             </ComboBox>
-                            <Button x:Name="btnApplyPreset" Content="Appliquer" Width="120" Margin="10,0,0,0" Background="#27AE60" Foreground="White" FontWeight="Bold" Click="btnApplyPreset_Click"/>
+                            <Button Content="✓ Appliquer" Background="{StaticResource SuccessBrush}" Style="{StaticResource Btn}" Margin="0" Click="btnApplyPreset_Click"/>
                         </StackPanel>
-                    </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- BOUTONS -->
+                <Border Style="{StaticResource Card}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button x:Name="btnCalculer" Content="📊 Calculer" Background="{StaticResource PrimaryBrush}" Style="{StaticResource Btn}" Click="btnCalculer_Click" Grid.Column="0" Margin="0,0,3,0"/>
+                        <Button x:Name="btnCalculInverse" Content="⟷ Inversé" Background="{StaticResource InfoBrush}" Style="{StaticResource Btn}" Click="btnCalculInverse_Click" Grid.Column="1" Margin="2,0,2,0"/>
+                        <Button x:Name="btnReset" Content="⟲ Reset" Background="{StaticResource GreyBrush}" Style="{StaticResource Btn}" Click="btnReset_Click" Grid.Column="2" Margin="2,0,2,0"/>
+                        <Button x:Name="btnExportCSV" Content="📥 CSV" Background="#2980B9" Style="{StaticResource Btn}" Click="btnExportCSV_Click" Grid.Column="3" Margin="3,0,0,0"/>
+                    </Grid>
                 </Border>
 
-                <!-- Boutons -->
-                <Border Style="{StaticResource Card}" Grid.Row="2">
+                <!-- RÉSULTATS -->
+                <Border Style="{StaticResource Card}">
                     <StackPanel>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
-                            <Button x:Name="btnCalculer" Content="Calculer" Width="120" Margin="5" Background="#2D9CDB" Foreground="White" FontWeight="Bold" Click="btnCalculer_Click"/>
-                            <Button x:Name="btnCalculInverse" Content="Calcul Inversé" Width="140" Margin="5" Background="#9B59B6" Foreground="White" FontWeight="Bold" Click="btnCalculInverse_Click"/>
-                            <Button x:Name="btnReset" Content="Réinitialiser" Width="120" Margin="5" Background="#6C7A89" Foreground="White" FontWeight="Bold" Click="btnReset_Click"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Button x:Name="btnStatistiques" Content="📊 Statistiques" Width="140" Margin="5" Background="#16A085" Foreground="White" FontWeight="Bold" Click="btnStatistiques_Click"/>
-                            <Button x:Name="btnExportCSV" Content="📥 Export CSV" Width="140" Margin="5" Background="#2980B9" Foreground="White" FontWeight="Bold" Click="btnExportCSV_Click"/>
-                            <Button x:Name="btnExportHTML" Content="📄 Rapport HTML" Width="140" Margin="5" Background="#D35400" Foreground="White" FontWeight="Bold" Click="btnExportHTML_Click"/>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-
-                <!-- Récapitulatif rapide -->
-                <Border Style="{StaticResource Card}" Grid.Row="3">
-                    <StackPanel>
-                        <TextBlock Text="Récap rapide" FontWeight="Bold" FontSize="16" Foreground="#1F2A44" Margin="0,0,0,12"/>
-                        <Grid>
+                        <TextBlock Text="📈 Résultats" Style="{StaticResource SectionTitle}"/>
+                        
+                        <!-- 3 indicateurs + 2 marges -->
+                        <Grid Margin="0,0,0,8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            
-                            <!-- DS -->
-                            <StackPanel Grid.Column="0">
-                                <TextBlock Text="Déboursé sec" FontSize="12" Foreground="#7F8FA3" Margin="0,0,0,4"/>
-                                <TextBlock x:Name="txtRecapDS" FontSize="18" FontWeight="Bold" Foreground="#2D9CDB"/>
-                            </StackPanel>
-                            
-                            <!-- HT -->
-                            <StackPanel Grid.Column="1" HorizontalAlignment="Center">
-                                <TextBlock Text="Prix HT" FontSize="12" Foreground="#7F8FA3" Margin="0,0,0,4"/>
-                                <TextBlock x:Name="txtRecapHT" FontSize="18" FontWeight="Bold" Foreground="#2D9CDB"/>
-                            </StackPanel>
-                            
-                            <!-- Prix TTC -->
-                            <StackPanel Grid.Column="2" HorizontalAlignment="Right">
-                                <TextBlock Text="Prix TTC" FontSize="12" Foreground="#7F8FA3" Margin="0,0,0,4"/>
-                                <TextBlock x:Name="txtRecapTTC" FontSize="18" FontWeight="Bold" Foreground="#27AE60"/>
-                            </StackPanel>
-                        </Grid>
-                    </StackPanel>
-                </Border>
 
-                <!-- Resultats -->
-                <Border Style="{StaticResource Card}" Grid.Row="4">
-                    <StackPanel>
-                        <TextBlock Text="Résultats" FontWeight="Bold" FontSize="16" Foreground="#1F2A44" Margin="0,0,0,12"/>
+                            <Border Grid.Column="0" Background="#EBF5FB" Padding="10" CornerRadius="4" Margin="0,0,3,0">
+                                <StackPanel>
+                                    <TextBlock Text="Déboursé sec" FontSize="10" Foreground="#7F8C8D" Margin="0,0,0,3"/>
+                                    <TextBlock x:Name="txtRecapDS" FontSize="14" FontWeight="Bold" Foreground="#3498DB" Text="0,00 €"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Column="1" Background="#FEF5E7" Padding="10" CornerRadius="4" Margin="3,0,3,0">
+                                <StackPanel>
+                                    <TextBlock Text="Prix revient" FontSize="10" Foreground="#7F8C8D" Margin="0,0,0,3"/>
+                                    <TextBlock x:Name="txtPrixRevient" FontSize="14" FontWeight="Bold" Foreground="#F39C12" Text="0,00 €"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Column="2" Background="#E8F8F5" Padding="10" CornerRadius="4" Margin="3,0,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="Prix HT" FontSize="10" Foreground="#7F8C8D" Margin="0,0,0,3"/>
+                                    <TextBlock x:Name="txtRecapHT" FontSize="14" FontWeight="Bold" Foreground="#2ECC71" Text="0,00 €"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <!-- Prix TTC + Remise -->
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="6"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0" Background="#E8DAEF" Padding="10" CornerRadius="4">
+                                <StackPanel>
+                                    <TextBlock Text="Prix TTC" FontSize="10" Foreground="#7F8C8D" Margin="0,0,0,3"/>
+                                    <TextBlock x:Name="txtRecapTTC" FontSize="14" FontWeight="Bold" Foreground="#9B59B6" Text="0,00 €"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Column="2" Background="#FFF4E5" Padding="10" CornerRadius="4">
+                                <StackPanel>
+                                    <TextBlock Text="Remise appliquée" FontSize="10" Foreground="#7F8C8D" Margin="0,0,0,3"/>
+                                    <TextBlock x:Name="txtRecapRemise" FontSize="14" FontWeight="Bold" Foreground="#E67E22" Text="Pas de remise"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <!-- MARGES CÔTE À CÔTE -->
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="6"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            
-                            <!-- Prix de revient -->
-                            <StackPanel Grid.Column="0">
-                                <TextBlock Text="Prix de revient (avec frais)" FontSize="11" Foreground="#7F8FA3" Margin="0,0,0,4"/>
-                                <TextBlock x:Name="txtPrixRevient" FontSize="16" FontWeight="Bold" Foreground="#2D9CDB"/>
-                            </StackPanel>
-                            
-                            <!-- Marge brute -->
-                            <StackPanel Grid.Column="1" HorizontalAlignment="Center">
-                                <TextBlock Text="Marge brute" FontSize="11" Foreground="#7F8FA3" Margin="0,0,0,4"/>
-                                <TextBlock x:Name="txtMargeBrute" FontSize="16" FontWeight="Bold" Foreground="#F39C12"/>
-                            </StackPanel>
-                            
-                            <!-- Marge nette -->
-                            <StackPanel Grid.Column="2" HorizontalAlignment="Right">
-                                <TextBlock Text="Marge nette" FontSize="11" Foreground="#7F8FA3" Margin="0,0,0,4"/>
-                                <TextBlock x:Name="txtMargeNette" FontSize="16" FontWeight="Bold" Foreground="#27AE60"/>
-                            </StackPanel>
+
+                            <Border Grid.Column="0" Background="#FADBD8" Padding="12" CornerRadius="4">
+                                <StackPanel>
+                                    <TextBlock Text="💸 Marge brute" FontSize="11" Foreground="#C0392B" Margin="0,0,0,4" HorizontalAlignment="Center"/>
+                                    <TextBlock x:Name="txtMargeBrute" FontSize="22" FontWeight="Bold" Foreground="#E74C3C" Text="0,00%" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Column="2" Background="#D5F4E6" Padding="12" CornerRadius="4">
+                                <StackPanel>
+                                    <TextBlock Text="💰 Marge nette" FontSize="11" Foreground="#16A085" Margin="0,0,0,4" HorizontalAlignment="Center"/>
+                                    <TextBlock x:Name="txtMargeNette" FontSize="22" FontWeight="Bold" Foreground="#27AE60" Text="0,00%" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
                         </Grid>
                     </StackPanel>
                 </Border>
 
-                <!-- Historique -->
-                <Border Style="{StaticResource Card}" Grid.Row="5">
+                <!-- HISTORIQUE -->
+                <Border Style="{StaticResource Card}">
                     <StackPanel>
-                        <TextBlock Text="Historique (double-clic pour recharger)" FontWeight="Bold" FontSize="16" Foreground="#1F2A44" Margin="0,0,0,8"/>
-                        <ListBox x:Name="lstHistorique" Visibility="Collapsed" Background="White" Foreground="#2C3E50" Height="150" MouseDoubleClick="lstHistorique_MouseDoubleClick"/>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
-                            <Button x:Name="btnClearHistory" Content="Nettoyer l'historique" Width="200" Margin="10" Background="#E74C3C" Foreground="White" FontWeight="Bold" Visibility="Collapsed" Click="btnClearHistory_Click"/>
-                            <Button x:Name="btnDeleteSelected" Content="Supprimer la sélection" Width="200" Margin="10" Background="#F39C12" Foreground="White" FontWeight="Bold" Visibility="Collapsed" Click="btnDeleteSelected_Click"/>
+                        <TextBlock Text="📋 Historique" Style="{StaticResource SectionTitle}"/>
+                        <ListBox x:Name="lstHistorique" Height="70" Background="White" BorderBrush="#D5DBDB" BorderThickness="1" FontSize="10" Padding="6" MouseDoubleClick="lstHistorique_MouseDoubleClick"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,0">
+                            <Button x:Name="btnStatistiques" Content="📊 Stats" Width="100" Height="28" FontSize="11" Background="#16A085" Foreground="White" FontWeight="SemiBold" Click="btnStatistiques_Click" Margin="0,0,5,0" Cursor="Hand"/>
+                            <Button x:Name="btnClearHistory" Content="🗑 Nettoyer" Width="100" Height="28" FontSize="11" Background="{StaticResource DangerBrush}" Foreground="White" FontWeight="SemiBold" Click="btnClearHistory_Click" Margin="3,0,3,0" Cursor="Hand"/>
+                            <Button x:Name="btnDeleteSelected" Content="❌ Supprimer" Width="100" Height="28" FontSize="11" Background="{StaticResource WarningBrush}" Foreground="White" FontWeight="SemiBold" Click="btnDeleteSelected_Click" Margin="5,0,0,0" Cursor="Hand"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
-            </Grid>
+
+            </StackPanel>
         </ScrollViewer>
     </DockPanel>
 </Window>

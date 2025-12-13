@@ -20,7 +20,7 @@ namespace CalculatriceMargeWPF
         private const string HISTORIQUE_SUBFOLDER = "Historique";
         private const string HISTORIQUE_FILENAME = "historique.txt";
 
-        private string historiquePath = "Historique/historique.txt";
+        private string historiquePath;
         private CalculationEngine _engine;
         private UndoRedoManager _undoRedoManager;
         private PresetManager _presetManager;
@@ -29,6 +29,7 @@ namespace CalculatriceMargeWPF
         private ThemeManager _themeManager;
         private PreferencesManager _preferencesManager;
         private System.Windows.Threading.DispatcherTimer _autoSaveTimer;
+        private bool _isInitialized = false;
 
         public MainWindow()
         {
@@ -50,10 +51,9 @@ namespace CalculatriceMargeWPF
             ChargerHistorique();
             ChargerPresets();
             
-            // Initialiser les valeurs par défaut
-            // txtDebourse et txtVente restent vides par défaut
+            // Initialiser les valeurs par défaut - Preset Standard
             txtTVA.Text = "20";
-            txtFrais.Text = "10";
+            txtFrais.Text = "25";
             cmbFraisMode.SelectedIndex = 0;
             cmbPresets.SelectedIndex = 0;
             
@@ -67,12 +67,17 @@ namespace CalculatriceMargeWPF
             NumberFormatter.SetupThousandsSeparatorTextBoxNoDecimals(txtFrais);  // Pas de décimales pour Frais
             NumberFormatter.SetupThousandsSeparatorTextBox(txtTVA);
             NumberFormatter.SetupThousandsSeparatorTextBox(txtRevient);
+            NumberFormatter.SetupThousandsSeparatorTextBox(txtRemise);
+            NumberFormatter.SetupThousandsSeparatorTextBox(txtPrixApresRemise);
             
             // Support clavier
             this.KeyDown += MainWindow_KeyDown;
             
             // Initialiser l'auto-save
             InitializeAutoSave();
+            
+            // Marquer comme initialisé
+            _isInitialized = true;
         }
 
         private void LoadPreferences()
@@ -161,13 +166,24 @@ namespace CalculatriceMargeWPF
 
         private void ChargerHistorique()
         {
-            if (File.Exists(historiquePath))
+            try
             {
-                var lignes = File.ReadAllLines(historiquePath);
-                foreach (var ligne in lignes)
+                if (File.Exists(historiquePath))
                 {
-                    lstHistorique.Items.Add(ligne);
+                    var lignes = File.ReadAllLines(historiquePath);
+                    lstHistorique.Items.Clear();
+                    foreach (var ligne in lignes)
+                    {
+                        if (!string.IsNullOrWhiteSpace(ligne))
+                        {
+                            lstHistorique.Items.Add(ligne);
+                        }
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors du chargement de l'historique:\n{ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -178,31 +194,82 @@ namespace CalculatriceMargeWPF
                 if (!TryLireSaisies(out double debourseSec, out double prixVenteHT, out double tva, out double fraisGenerauxPct, out bool fraisEnPourcent)) 
                     return;
 
-                // Utiliser le CalculationEngine
-                var result = _engine.Calculate(debourseSec, prixVenteHT, tva, fraisGenerauxPct, fraisEnPourcent);
+                // Vérifier si une remise est appliquée et utiliser le prix après remise pour le calcul
+                double prixPourCalcul = prixVenteHT;
+                if (NumberFormatter.TryParseFormattedNumber(txtPrixApresRemise.Text, out double prixApresRemise) && prixApresRemise > 0)
+                {
+                    prixPourCalcul = prixApresRemise;
+                }
+
+                // Utiliser le CalculationEngine avec le prix ajusté
+                var result = _engine.Calculate(debourseSec, prixPourCalcul, tva, fraisGenerauxPct, fraisEnPourcent);
                 
                 // Récupérer le titre
                 result.Titre = string.IsNullOrWhiteSpace(txtTitre.Text) ? DEFAULT_TITLE : txtTitre.Text;
                 
                 // Vérifier les doublons
-                bool titreExiste = _resultsList.Any(r => r.Titre == result.Titre);
+                var existingResult = _resultsList.FirstOrDefault(r => r.Titre == result.Titre);
+                int indexHistorique = -1;
                 
-                if (!titreExiste)
+                if (existingResult != null)
                 {
-                    // Ajouter aux résultats
-                    _resultsList.Add(result);
-                    _undoRedoManager.Push(result);
+                    // Demander confirmation pour écraser
+                    var reponse = MessageBox.Show(
+                        $"Un calcul avec le titre \"{result.Titre}\" existe déjà.\n\nVoulez-vous le mettre à jour ?",
+                        "Confirmation",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Question);
                     
-                    // Afficher les résultats
-                    AfficherResultats(result);
+                    if (reponse == MessageBoxResult.No)
+                    {
+                        return; // Annuler
+                    }
                     
-                    // Sauvegarder dans l'historique
-                    lstHistorique.Items.Add(result.ToString());
-                    File.AppendAllText(historiquePath, result.ToString() + Environment.NewLine);
+                    // Supprimer l'ancien de la liste
+                    _resultsList.Remove(existingResult);
+                    
+                    // Trouver l'index dans l'historique pour mise à jour
+                    for (int i = 0; i < lstHistorique.Items.Count; i++)
+                    {
+                        string item = lstHistorique.Items[i].ToString();
+                        if (item.StartsWith(result.Titre + " |"))
+                        {
+                            indexHistorique = i;
+                            break;
+                        }
+                    }
                 }
-                else
+                
+                // Ajouter aux résultats
+                _resultsList.Add(result);
+                _undoRedoManager.Push(result);
+                
+                // Afficher les résultats
+                AfficherResultats(result);
+                
+                // Sauvegarder dans l'historique
+                try
                 {
-                    MessageBox.Show($"Un calcul avec le titre \"{result.Titre}\" existe déjà.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                    string ligneHistorique = result.ToString();
+                    
+                    if (indexHistorique >= 0)
+                    {
+                        // Mettre à jour la ligne existante
+                        lstHistorique.Items[indexHistorique] = ligneHistorique;
+                    }
+                    else
+                    {
+                        // Ajouter nouvelle ligne
+                        lstHistorique.Items.Add(ligneHistorique);
+                    }
+                    
+                    // Réécrire tout l'historique
+                    var toutesLignes = lstHistorique.Items.Cast<string>().ToList();
+                    File.WriteAllLines(historiquePath, toutesLignes, System.Text.Encoding.UTF8);
+                }
+                catch (Exception exHist)
+                {
+                    MessageBox.Show($"Erreur lors de la sauvegarde dans l'historique:\n{exHist.Message}", "Avertissement", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
             catch (ArgumentException ex)
@@ -224,6 +291,25 @@ namespace CalculatriceMargeWPF
             txtPrixRevient.Text = result.PrixRevientTotal.ToString("C");
             txtMargeBrute.Text = $"{result.MargeBruteEuro:C} ({result.MargeBrutePct:F2}%)";
             txtMargeNette.Text = $"{result.MargeNetteEuro:C} ({result.MargeNettePct:F2}%)";
+            
+            // Afficher la remise si elle existe
+            if (NumberFormatter.TryParseFormattedNumber(txtRemise.Text, out double remisePct) && remisePct > 0)
+            {
+                // Utiliser le prix INITIAL (txtVente) pour calculer le montant de la remise
+                if (NumberFormatter.TryParseFormattedNumber(txtVente.Text, out double prixInitial))
+                {
+                    double montantRemise = prixInitial * (remisePct / 100.0);
+                    txtRecapRemise.Text = $"{remisePct:F2}% ({montantRemise:C})";
+                }
+                else
+                {
+                    txtRecapRemise.Text = $"{remisePct:F2}%";
+                }
+            }
+            else
+            {
+                txtRecapRemise.Text = "Pas de remise";
+            }
             
             // Alerte si marge < 15%
             // Note: Ajouter lblAvertissement dans le XAML pour afficher ces alertes
@@ -365,37 +451,6 @@ namespace CalculatriceMargeWPF
             }
         }
 
-        private void btnExportHTML_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (_resultsList.Count == 0)
-                {
-                    MessageBox.Show("Aucun calcul à exporter.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
-                    return;
-                }
-
-                var stats = _engine.ComputeStatistics(_resultsList.ToArray());
-
-                SaveFileDialog dialog = new SaveFileDialog
-                {
-                    Filter = "HTML (*.html)|*.html",
-                    DefaultExt = ".html",
-                    FileName = $"rapport_marges_{DateTime.Now:yyyyMMdd_HHmmss}.html"
-                };
-
-                if (dialog.ShowDialog() == true)
-                {
-                    ExportManager.ExportToHTML(stats, _resultsList, dialog.FileName);
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = dialog.FileName, UseShellExecute = true });
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erreur export:\n{ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
         private void btnStatistiques_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -454,6 +509,54 @@ namespace CalculatriceMargeWPF
             lstHistorique.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
             btnClearHistory.Visibility = lstHistorique.Visibility;
             btnDeleteSelected.Visibility = lstHistorique.Visibility;
+        }
+
+        private void txtRemise_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            CalculerRemise();
+        }
+
+        private void txtVente_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            CalculerRemise();
+        }
+
+        private void CalculerRemise()
+        {
+            if (!_isInitialized) return;
+            
+            try
+            {
+                // Vérifier que les champs nécessaires sont remplis
+                if (string.IsNullOrWhiteSpace(txtVente.Text) || string.IsNullOrWhiteSpace(txtRemise.Text))
+                {
+                    txtPrixApresRemise.Text = "";
+                    return;
+                }
+
+                // Parser les valeurs
+                if (double.TryParse(txtVente.Text.Replace(" ", ""), out double prixHT) &&
+                    double.TryParse(txtRemise.Text.Replace(" ", ""), out double remisePct))
+                {
+                    // Si remise = 0%, vider le champ
+                    if (remisePct == 0)
+                    {
+                        txtPrixApresRemise.Text = "";
+                        return;
+                    }
+                    
+                    // Calculer le prix après remise
+                    double montantRemise = prixHT * (remisePct / 100.0);
+                    double prixApresRemise = prixHT - montantRemise;
+                    
+                    // Afficher le résultat
+                    txtPrixApresRemise.Text = prixApresRemise.ToString("F2");
+                }
+            }
+            catch
+            {
+                txtPrixApresRemise.Text = "";
+            }
         }
 
         private void MenuSauvegarder_Click(object sender, RoutedEventArgs e)
@@ -571,20 +674,26 @@ namespace CalculatriceMargeWPF
             debourseSec = prixVenteHT = tva = fraisGenerauxPct = 0;
             fraisEnPourcent = cmbFraisMode.SelectedIndex == 0;
 
-            bool saisiesValides = NumberFormatter.TryParseFormattedNumber(txtDebourse.Text, out debourseSec)
-                                 && NumberFormatter.TryParseFormattedNumber(txtVente.Text, out prixVenteHT)
-                                 && NumberFormatter.TryParseFormattedNumber(txtTVA.Text, out tva)
-                                 && NumberFormatter.TryParseFormattedNumber(txtFrais.Text, out fraisGenerauxPct);
+            // Parser les valeurs avec gestion des champs vides
+            bool deburseOk = string.IsNullOrWhiteSpace(txtDebourse.Text) || NumberFormatter.TryParseFormattedNumber(txtDebourse.Text, out debourseSec);
+            bool venteOk = string.IsNullOrWhiteSpace(txtVente.Text) || NumberFormatter.TryParseFormattedNumber(txtVente.Text, out prixVenteHT);
+            bool tvaOk = string.IsNullOrWhiteSpace(txtTVA.Text) || NumberFormatter.TryParseFormattedNumber(txtTVA.Text, out tva);
+            bool fraisOk = string.IsNullOrWhiteSpace(txtFrais.Text) || NumberFormatter.TryParseFormattedNumber(txtFrais.Text, out fraisGenerauxPct);
 
-            if (!saisiesValides)
+            // Si les champs vides, utiliser valeurs par défaut
+            if (string.IsNullOrWhiteSpace(txtTVA.Text)) tva = 20;
+            if (string.IsNullOrWhiteSpace(txtFrais.Text)) fraisGenerauxPct = 25;
+
+            if (!deburseOk || !venteOk || !tvaOk || !fraisOk)
             {
                 MessageBox.Show("Veuillez entrer des valeurs numériques valides.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
 
-            if (prixVenteHT <= 0)
+            // Vérifier qu'au moins un champ essentiel est rempli
+            if (debourseSec == 0 && prixVenteHT == 0)
             {
-                MessageBox.Show("Le prix de vente HT doit être supérieur à zéro pour calculer les marges.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Veuillez remplir au moins le Déboursé sec ou le Prix de vente HT.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
 
