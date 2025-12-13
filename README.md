@@ -216,6 +216,6 @@ Voir [LICENSE.txt](LICENSE.txt)
 ---
 
 **Développée avec ❤️ en C# et WPF**
-**Auteur: C.L (Skill Teams)
+**Auteur: C.L (Skill Teams)**
 Version: **2.1.0**  
 Date: 13 décembre 2025
