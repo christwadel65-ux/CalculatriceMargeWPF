@@ -207,7 +207,7 @@ CalculatriceMargeWPF/
 
 Pour toute question ou bug, consultez:
 - [Documentation](./docs/guides/README.md)
-- [Guide d'implémentation](./docs/guides/IMPLEMENTATION_SUMMARY.md)
+- [Guide d'implémentation](./docs/guides/INSTALLER_GUIDE.md)
 
 ## 📄 Licence
 
