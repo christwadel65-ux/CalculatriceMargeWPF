@@ -838,7 +838,7 @@ namespace CalculatriceMargeWPF
         private void MenuGuide_Click(object sender, RoutedEventArgs e)
         {
             // Ouvrir le guide local (README.md) dans Internet Explorer
-            string readmePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "docs", "README.md");
+            string readmePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "docs", "guides", "README.md");
             OpenMarkdownWithInternetExplorer(readmePath);
         }
 

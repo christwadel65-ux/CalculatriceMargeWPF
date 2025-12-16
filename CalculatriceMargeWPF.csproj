@@ -21,6 +21,8 @@
     <DebugSymbols>false</DebugSymbols>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- Garder uniquement le français -->
+    <SatelliteResourceLanguages>fr</SatelliteResourceLanguages>
   </PropertyGroup>
 
   <!-- Exclure les fichiers .pdb de la publication -->
