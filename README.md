@@ -206,8 +206,9 @@ CalculatriceMargeWPF/
 ## 📧 Support
 
 Pour toute question ou bug, consultez:
-- [Documentation](./docs/guides/README.md)
-- [Guide d'implémentation](./docs/guides/INSTALLER_GUIDE.md)
+- [Documentation complète](./README_V2.1.0.md)
+- [Guide des guides](./docs/guides/README.md)
+- [GitHub Issues](https://github.com/christwadel65-ux/CalculatriceMarge/issues)
 
 ## 📄 Licence
 
@@ -217,5 +218,6 @@ Voir [LICENSE.txt](LICENSE.txt)
 
 **Développée avec ❤️ en C# et WPF**
 **Auteur: C.L (Skill Teams)**
+
 Version: **2.1.0**  
-Date: 13 décembre 2025
+Dernière mise à jour: 16 décembre 2025
