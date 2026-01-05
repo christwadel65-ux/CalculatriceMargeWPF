@@ -1,4 +1,4 @@
-# CalculatriceMarge v2.1.0 - Release Notes
+# CalculatriceMarge v2.2.0 - Release Notes
 
 ## 🎉 Nouveautés Principales
 
@@ -16,7 +16,7 @@
 - **Localisation**: `C:\Program Files (x86)\CalculatriceMarge`
 
 ### Distributions
-1. **Installateur** (`CalculatriceMargeWPF-2.1.0-Setup.exe`)
+1. **Installateur** (`CalculatriceMargeWPF-2.2.0-Setup.exe`)
    - Taille: ~43 MB
    - Installation automatique avec toutes dépendances
    
@@ -54,7 +54,7 @@
 ✅ Support clavier complet  
 ✅ Thème clair/sombre  
 
-## 🐛 Correctifs v2.1.0
+## 🐛 Correctifs v2.2.0
 - Optimisation taille fichiers
 - Amélioration performances au démarrage
 - Nettoyage dépendances inutiles
@@ -62,7 +62,7 @@
 
 ## 🔄 Migration depuis v2.0
 
-L'installation de v2.1.0 met à jour automatiquement v2.0.
+L'installation de v2.2.0 met à jour automatiquement v2.1.
 Vos paramètres et historique sont conservés!
 
 ## 📖 Documentation
@@ -88,12 +88,12 @@ Pour les bugs ou suggestions:
 
 ## 📝 Licence
 
-CalculatriceMarge v2.1.0 est sous licence **MIT**.
+CalculatriceMarge v2.2.0 est sous licence **MIT**.
 Gratuit pour un usage personnel et commercial.
 
 ---
 
-**Publié**: 13 Décembre 2025  
+**Publié**: 4 Janvier 2026  
 **Auteur**: C. Lecomte  
 **Plateforme**: Windows 64-bit  
 **Runtime**: .NET 10.0 (inclus)

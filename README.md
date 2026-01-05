@@ -1,4 +1,4 @@
-# Calculatrice de Marge v2.1.0
+# Calculatrice de Marge v2.2.0
 
 **Une application WPF professionnelle pour calculer les marges commerciales avec précision.**
 
@@ -165,7 +165,7 @@ CalculatriceMargeWPF/
 │   └── Resources/       # Ressources (images, styles)
 ├── tests/               # Tests unitaires
 ├── bin/                 # Fichiers compilés
-├── README_V2.1.0.md    # Ce fichier
+├── README.md            # Ce fichier
 └── CalculatriceMargeWPF.sln
 ```
 
@@ -186,7 +186,7 @@ CalculatriceMargeWPF/
 
 ## 📝 Notes de version
 
-### v2.1.0 (13/12/2025)
+### v2.2.0 (04/01/2026)
 - ✨ Interface complètement refactorisée (design compact et moderne)
 - ✨ Affichage des remises appliquées côte à côte avec Prix TTC
 - ✨ Recalcul des marges avec remises
@@ -206,7 +206,7 @@ CalculatriceMargeWPF/
 ## 📧 Support
 
 Pour toute question ou bug, consultez:
-- [Documentation complète](./README_V2.1.0.md)
+- [Documentation complète](./README.md)
 - [Guide des guides](./docs/guides/README.md)
 - [GitHub Issues](https://github.com/christwadel65-ux/CalculatriceMarge/issues)
 
@@ -219,5 +219,5 @@ Voir [LICENSE.txt](LICENSE.txt)
 **Développée avec ❤️ en C# et WPF**
 **Auteur: C.L (Skill Teams)**
 
-Version: **2.1.0**  
-Dernière mise à jour: 16 décembre 2025
+Version: **2.2.0**  
+Dernière mise à jour: 4 janvier 2026

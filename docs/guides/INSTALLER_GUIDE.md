@@ -116,7 +116,7 @@ Données user:  C:\Users\{user}\AppData\Roaming\CalculatriceMarge\
 1. **Ouvrir** `CalculatriceMargeInstaller.iss` dans un éditeur texte
 2. **Modifier les variables** en haut:
    ```ini
-   #define MyAppVersion "2.1.0"      // Nouvelle version
+  #define MyAppVersion "2.2.0"      // Nouvelle version
    #define MyAppURL "https://..."     // Nouveau URL
    ```
 3. **Ajouter/supprimer des fichiers** dans la section `[Files]`:
@@ -136,7 +136,7 @@ dotnet build -c Release
 "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" CalculatriceMargeInstaller.iss
 
 # 4. Tester installateur
-.\bin\Release\Installer\CalculatriceMargeInstaller_v2.0.0.exe
+.\bin\Release\Installer\CalculatriceMargeInstaller_v2.2.0.exe
 
 # 5. Committer
 git add CalculatriceMargeInstaller.iss CalculatriceMargeWPF.csproj
@@ -214,7 +214,7 @@ SignTool=signtool /f "C:\cert.pfx" /p password /t http://timestamp.server /d "Ap
 ### Vérification Intégrité
 ```powershell
 # Calculer hash SHA256
-Get-FileHash CalculatriceMargeInstaller_v2.0.0.exe -Algorithm SHA256
+Get-FileHash CalculatriceMargeInstaller_v2.2.0.exe -Algorithm SHA256
 
 # Publier le hash sur GitHub Releases pour vérification
 ```
@@ -223,20 +223,20 @@ Get-FileHash CalculatriceMargeInstaller_v2.0.0.exe -Algorithm SHA256
 
 ## 📝 Template Nouvelles Versions
 
-Pour créer une version v2.1.0:
+Pour créer une version v2.2.0:
 
 ```diff
 [Setup]
-- #define MyAppVersion "2.0.0"
-+ #define MyAppVersion "2.1.0"
+- #define MyAppVersion "2.1.0"
++ #define MyAppVersion "2.2.0"
 
 # Modifier aussi dans:
-- OutputBaseFilename=CalculatriceMargeInstaller_v2.0.0
-+ OutputBaseFilename=CalculatriceMargeInstaller_v2.1.0
+- OutputBaseFilename=CalculatriceMargeInstaller_v2.1.0
++ OutputBaseFilename=CalculatriceMargeInstaller_v2.2.0
 
 # Et dans .csproj:
-- <Version>2.0.0</Version>
-+ <Version>2.1.0</Version>
+- <Version>2.1.0</Version>
++ <Version>2.2.0</Version>
 ```
 
 ---
@@ -247,7 +247,7 @@ Pour créer une version v2.1.0:
 |--------|--------|
 | **Fichier** | CalculatriceMargeInstaller.iss |
 | **Outil** | Inno Setup 6.0+ |
-| **Sortie** | CalculatriceMargeInstaller_v2.0.0.exe |
+| **Sortie** | CalculatriceMargeInstaller_v2.2.0.exe |
 | **Taille** | ~80-200 MB |
 | **Langues** | Français, Anglais |
 | **Compatibilité** | Windows 10+ x64/arm64 |
@@ -256,5 +256,5 @@ Pour créer une version v2.1.0:
 ---
 
 **Documenté:** 8 Décembre 2025
-**Version:** 2.0.0
+**Version:** 2.2.0
 **Status:** ✅ Prêt pour distribution

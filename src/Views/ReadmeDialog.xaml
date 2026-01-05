@@ -1,0 +1,33 @@
+<Window x:Class="CalculatriceMargeWPF.Views.ReadmeDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Guide d'utilisation" 
+        Height="700" Width="900" 
+        WindowStartupLocation="CenterOwner"
+        Background="#F0F3F7"
+        FontFamily="Segoe UI">
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Padding="20">
+            <TextBlock x:Name="readmeContent" 
+                       TextWrapping="Wrap"
+                       Foreground="#2C3E50"
+                       FontSize="12"
+                       LineHeight="20"/>
+        </ScrollViewer>
+
+        <Border Grid.Row="1" Background="White" Padding="15" BorderBrush="#D5DBDB" BorderThickness="0,1,0,0">
+            <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                <Button Content="Fermer" Click="CloseButton_Click" 
+                        Padding="15,8" Margin="0" 
+                        Background="#95A5A6" Foreground="White"
+                        FontWeight="SemiBold" Cursor="Hand"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

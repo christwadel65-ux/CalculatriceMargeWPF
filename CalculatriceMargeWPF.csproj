@@ -6,9 +6,9 @@
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <EnableDefaultPageItems>false</EnableDefaultPageItems>
     <ApplicationIcon>src\Resources\Images\app_icon.ico</ApplicationIcon>
-    <AssemblyVersion>2.1.0.0</AssemblyVersion>
-    <FileVersion>2.1.0.0</FileVersion>
-    <Version>2.1.0</Version>
+    <AssemblyVersion>2.2.0.0</AssemblyVersion>
+    <FileVersion>2.2.0.0</FileVersion>
+    <Version>2.2.0</Version>
     <Authors>C. Lecomte</Authors>
     <Description>Application professionnelle WPF pour calculer intelligemment vos marges brutes et nettes</Description>
     <PackageProjectUrl>https://github.com/christwadel65-ux/CalculatriceMarge</PackageProjectUrl>
@@ -31,13 +31,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="src\Resources\Images\app_icon.png" />
+    <EmbeddedResource Include="README.md" />
+    <EmbeddedResource Include="LICENSE.txt" />
     <None Update="docs\README.md">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="docs\guides\IMPLEMENTATION_SUMMARY.md">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="LICENSE.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -47,9 +46,13 @@
     <ApplicationDefinition Include="src\App.xaml" />
     <Page Include="src\Views\MainWindow.xaml" />
     <Page Include="src\Views\MargeViseeDialog.xaml" />
+    <Page Include="src\Views\ReadmeDialog.xaml" />
+    <Page Include="src\Views\CustomPresetDialog.xaml" />
     <Compile Include="src\App.xaml.cs" DependentUpon="src\App.xaml" />
     <Compile Include="src\Views\MainWindow.xaml.cs" DependentUpon="src\Views\MainWindow.xaml" />
     <Compile Include="src\Views\MargeViseeDialog.xaml.cs" DependentUpon="src\Views\MargeViseeDialog.xaml" />
+    <Compile Include="src\Views\ReadmeDialog.xaml.cs" DependentUpon="src\Views\ReadmeDialog.xaml" />
+    <Compile Include="src\Views\CustomPresetDialog.xaml.cs" DependentUpon="src\Views\CustomPresetDialog.xaml" />
   </ItemGroup>
 
   <!-- C# Source Files -->

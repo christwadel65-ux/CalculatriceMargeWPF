@@ -173,6 +173,14 @@
                                 <ComboBoxItem Content="Service (10% TVA, 15% FG)"/>
                             </ComboBox>
                             <Button Content="✓ Appliquer" Background="{StaticResource SuccessBrush}" Style="{StaticResource Btn}" Margin="0" Click="btnApplyPreset_Click"/>
+
+                            <TextBlock Text="Presets personnalisés" Style="{StaticResource SectionTitle}" Margin="0,10,0,6"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                <Button x:Name="btnSavePreset" Content="➕ Ajouter" Background="#2ECC71" Style="{StaticResource Btn}" Width="90" Margin="0,0,6,0" Click="btnSavePreset_Click"/>
+                                <Button x:Name="btnApplyCustomPreset" Content="✓ Charger" Background="#2980B9" Style="{StaticResource Btn}" Width="90" Margin="0,0,6,0" Click="btnApplyCustomPreset_Click"/>
+                                <Button x:Name="btnDeletePreset" Content="🗑 Supprimer" Background="#E74C3C" Style="{StaticResource Btn}" Width="90" Click="btnDeletePreset_Click"/>
+                            </StackPanel>
+                            <ListBox x:Name="lstCustomPresets" Height="110" DisplayMemberPath="Name" SelectionChanged="lstCustomPresets_SelectionChanged"/>
                         </StackPanel>
                     </Border>
                 </Grid>
@@ -185,12 +193,25 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Button x:Name="btnCalculer" Content="📊 Calculer" Background="{StaticResource PrimaryBrush}" Style="{StaticResource Btn}" Click="btnCalculer_Click" Grid.Column="0" Margin="0,0,3,0"/>
                         <Button x:Name="btnCalculInverse" Content="⟷ Inversé" Background="{StaticResource InfoBrush}" Style="{StaticResource Btn}" Click="btnCalculInverse_Click" Grid.Column="1" Margin="2,0,2,0"/>
                         <Button x:Name="btnReset" Content="⟲ Reset" Background="{StaticResource GreyBrush}" Style="{StaticResource Btn}" Click="btnReset_Click" Grid.Column="2" Margin="2,0,2,0"/>
                         <Button x:Name="btnExportCSV" Content="📥 CSV" Background="#2980B9" Style="{StaticResource Btn}" Click="btnExportCSV_Click" Grid.Column="3" Margin="3,0,0,0"/>
+                        <Button x:Name="btnExportHTML" Content="🌐 HTML" Background="#8E44AD" Style="{StaticResource Btn}" Click="btnExportHTML_Click" Grid.Column="4" Margin="3,0,0,0"/>
                     </Grid>
+                </Border>
+
+                <!-- INTEROP & EXPORTS AVANCÉS -->
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Text="Interop &amp; exports" Style="{StaticResource SectionTitle}"/>
+                        <WrapPanel ItemHeight="32" ItemWidth="150" Margin="0,4,0,0">
+                            <Button x:Name="btnExportStats" Content="📈 Stats CSV" Background="#16A085" Style="{StaticResource Btn}" Width="140" Margin="0,0,6,6" Click="btnExportStats_Click"/>
+                            <Button x:Name="btnCopyLast" Content="📋 Copier dernier" Background="#34495E" Style="{StaticResource Btn}" Width="140" Margin="0,0,6,6" Click="btnCopyLast_Click"/>
+                        </WrapPanel>
+                    </StackPanel>
                 </Border>
 
                 <!-- RÉSULTATS -->
@@ -270,6 +291,66 @@
                                 <StackPanel>
                                     <TextBlock Text="💰 Marge nette" FontSize="11" Foreground="#16A085" Margin="0,0,0,4" HorizontalAlignment="Center"/>
                                     <TextBlock x:Name="txtMargeNette" FontSize="22" FontWeight="Bold" Foreground="#27AE60" Text="0,00%" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- TABLEAU DE BORD -->
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Text="📊 Tableau de bord" Style="{StaticResource SectionTitle}"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <Border Grid.Column="0" Grid.Row="0" Background="#EBF5FB" Padding="10" CornerRadius="4" Margin="0,0,6,6">
+                                <StackPanel>
+                                    <TextBlock Text="Nb calculs" Style="{StaticResource Label}"/>
+                                    <TextBlock x:Name="txtDashCalculs" FontSize="18" FontWeight="Bold" Foreground="#3498DB" Text="--"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Column="1" Grid.Row="0" Background="#E8F8F5" Padding="10" CornerRadius="4" Margin="0,0,6,6">
+                                <StackPanel>
+                                    <TextBlock Text="CA TTC total" Style="{StaticResource Label}"/>
+                                    <TextBlock x:Name="txtDashCA" FontSize="18" FontWeight="Bold" Foreground="#16A085" Text="--"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Column="2" Grid.Row="0" Background="#FEF5E7" Padding="10" CornerRadius="4" Margin="0,0,0,6">
+                                <StackPanel>
+                                    <TextBlock Text="Marge nette moyenne" Style="{StaticResource Label}"/>
+                                    <TextBlock x:Name="txtDashMargeNetteMoy" FontSize="18" FontWeight="Bold" Foreground="#E67E22" Text="--"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Column="0" Grid.Row="1" Background="#E8DAEF" Padding="10" CornerRadius="4" Margin="0,0,6,0">
+                                <StackPanel>
+                                    <TextBlock Text="Marge nette min / max" Style="{StaticResource Label}"/>
+                                    <TextBlock x:Name="txtDashMargeNetteMinMax" FontSize="18" FontWeight="Bold" Foreground="#8E44AD" Text="--"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Column="1" Grid.Row="1" Background="#FADBD8" Padding="10" CornerRadius="4" Margin="0,0,6,0">
+                                <StackPanel>
+                                    <TextBlock Text="Marge brute moyenne" Style="{StaticResource Label}"/>
+                                    <TextBlock x:Name="txtDashMargeBruteMoy" FontSize="18" FontWeight="Bold" Foreground="#C0392B" Text="--"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Column="2" Grid.Row="1" Background="#ECF0F1" Padding="10" CornerRadius="4">
+                                <StackPanel>
+                                    <TextBlock Text="Dernier titre" Style="{StaticResource Label}"/>
+                                    <TextBlock x:Name="txtDashLastTitle" FontSize="16" FontWeight="SemiBold" Foreground="#2C3E50" Text="--"/>
                                 </StackPanel>
                             </Border>
                         </Grid>
