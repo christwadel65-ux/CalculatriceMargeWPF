@@ -73,72 +73,85 @@ Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: 
 Filename: "{app}\{#MyAppExeName}"; Description: "Lancer {#MyAppName} maintenant"; Flags: nowait postinstall skipifsilent
 
 [Code]
+function GetUninstallString(): String;
+var
+  sUnInstPath: String;
+  sUnInstallString: String;
+begin
+  sUnInstPath := ExpandConstant('Software\Microsoft\Windows\CurrentVersion\Uninstall\{#emit SetupSetting("AppId")}_is1');
+  sUnInstallString := '';
+  
+  { Chercher dans HKLM d'abord }
+  if not RegQueryStringValue(HKLM, sUnInstPath, 'UninstallString', sUnInstallString) then
+  begin
+    { Puis chercher dans HKCU }
+    RegQueryStringValue(HKCU, sUnInstPath, 'UninstallString', sUnInstallString);
+  end;
+  
+  Result := sUnInstallString;
+end;
+
+function IsUpgrade(): Boolean;
+begin
+  Result := (GetUninstallString() <> '');
+end;
+
+function UnInstallOldVersion(): Integer;
+var
+  sUnInstallString: String;
+  iResultCode: Integer;
+begin
+  Result := 0;
+  sUnInstallString := GetUninstallString();
+  
+  if sUnInstallString <> '' then 
+  begin
+    { Enlever les guillemets du chemin }
+    sUnInstallString := RemoveQuotes(sUnInstallString);
+    
+    { Exécuter la désinstallation en mode silencieux }
+    if Exec(sUnInstallString, '/SILENT /NORESTART /SUPPRESSMSGBOXES', '', SW_HIDE, ewWaitUntilTerminated, iResultCode) then
+      Result := 1
+    else
+      Result := iResultCode;
+  end;
+end;
+
 procedure InitializeWizard();
 var
-  PreviousVersionInstalled: Boolean;
-  PreviousPath: string;
-  UninstallExePath: string;
-  UninstallString: string;
-  ResultCode: Integer;
+  UninstallResult: Integer;
 begin
-  { Vérifier si une version antérieure est installée dans la registre }
-  PreviousVersionInstalled := RegQueryStringValue(HKEY_LOCAL_MACHINE, 
-    'Software\Microsoft\Windows\CurrentVersion\Uninstall\CalculatriceMarge_is1',
-    'InstallLocation', PreviousPath);
-  
-  if PreviousVersionInstalled and (PreviousPath <> '') then
+  if IsUpgrade() then
   begin
-    { Essayer de récupérer le chemin de désinstallation }
-    if not RegQueryStringValue(HKEY_LOCAL_MACHINE,
-      'Software\Microsoft\Windows\CurrentVersion\Uninstall\CalculatriceMarge_is1',
-      'UninstallString', UninstallString) then
-    begin
-      { Si pas de UninstallString, vérifier dans CommonFiles }
-      UninstallExePath := ExpandConstant('{commonfil32}\CalculatriceMarge\unins000.exe');
-      if not FileExists(UninstallExePath) then
-        UninstallExePath := PreviousPath + 'unins000.exe';
-    end
-    else
-    begin
-      { Utiliser le chemin de UninstallString }
-      UninstallExePath := UninstallString;
-    end;
-    
-    { Avertir l'utilisateur qu'une version antérieure a été détectée }
-    if MsgBox('✅ Détection de version antérieure' + #13#10 + #13#10 +
-              'Une version antérieure de CalculatriceMarge a été trouvée.' + #13#10 + #13#10 +
-              'Installation détectée : ' + PreviousPath + #13#10 + #13#10 +
-              'La version actuelle va être désinstallée et remplacée par v2.2.0.' + #13#10 +
-              'Vos données historiques seront préservées.' + #13#10 + #13#10 +
+    if MsgBox('⚠️ Mise à jour détectée' + #13#10 + #13#10 +
+              'Une version précédente de CalculatriceMarge est installée.' + #13#10 + #13#10 +
+              'Elle sera automatiquement désinstallée avant l''installation de la v2.2.0.' + #13#10 +
+              'Vos données (historique, base de données) seront préservées.' + #13#10 + #13#10 +
               'Voulez-vous continuer ?',
-              mbConfirmation, MB_YESNO) = IDYES then
+              mbConfirmation, MB_YESNO or MB_DEFBUTTON1) = IDYES then
     begin
-      { Désinstaller silencieusement l'ancienne version }
-      if FileExists(UninstallExePath) then
+      UninstallResult := UnInstallOldVersion();
+      
+      if UninstallResult = 1 then
       begin
-        if Exec(UninstallExePath, '/SILENT /NORESTART', '', SW_SHOW, ewWaitUntilTerminated, ResultCode) then
-        begin
-          { La désinstallation s'est bien passée }
-          MsgBox('✅ Ancien programme désinstallé' + #13#10 + #13#10 +
-                 'Vous pouvez maintenant continuer avec l''installation de v2.2.0.',
-                 mbInformation, MB_OK);
-        end
-        else
-        begin
-          { Erreur lors de la désinstallation }
-          MsgBox('⚠️ Erreur lors de la désinstallation' + #13#10 + #13#10 +
-                 'Impossible de désinstaller l''ancienne version.' + #13#10 +
-                 'Code d''erreur : ' + IntToStr(ResultCode) + #13#10 + #13#10 +
-                 'Voulez-vous quand même continuer avec l''installation ?',
-                 mbError, MB_YESNO);
-        end;
+        { Désinstallation réussie }
+        MsgBox('✅ Ancienne version désinstallée avec succès.' + #13#10 + #13#10 +
+               'L''installation de la v2.2.0 va maintenant commencer.',
+               mbInformation, MB_OK);
+      end
+      else if UninstallResult = 0 then
+      begin
+        { Pas de désinstallation nécessaire }
       end
       else
       begin
-        MsgBox('⚠️ Programme de désinstallation non trouvé' + #13#10 + #13#10 +
-               'Localisation supposée : ' + UninstallExePath + #13#10 + #13#10 +
-               'L''ancienne version sera remplacée par les nouveaux fichiers.',
-               mbError, MB_OK);
+        { Erreur lors de la désinstallation }
+        if MsgBox('⚠️ Erreur lors de la désinstallation' + #13#10 + #13#10 +
+                  'Code erreur : ' + IntToStr(UninstallResult) + #13#10 + #13#10 +
+                  'Voulez-vous continuer l''installation malgré tout ?' + #13#10 +
+                  '(Les fichiers seront écrasés)',
+                  mbError, MB_YESNO or MB_DEFBUTTON2) = IDNO then
+          Abort();
       end;
     end
     else
