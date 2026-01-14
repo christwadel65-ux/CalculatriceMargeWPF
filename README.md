@@ -11,11 +11,25 @@
 - ✅ Remises applicables avec recalcul des marges
 - ✅ Calcul inversé (trouver le prix de vente pour une marge cible)
 
+### Historique & Base de données SQLite
+- ✅ **Base de données SQLite** robuste et performante
+- ✅ Migration automatique depuis ancien format texte
+- ✅ **Gestionnaire intégré** (Outils > Gestion base de données)
+  - Sauvegarde et restauration
+  - Vérification d'intégrité
+  - Optimisation (VACUUM)
+  - Statistiques avancées
+- ✅ Export d'éléments individuels (clic-droit > Exporter)
+  - Export CSV sélectif
+  - Export HTML professionnel
+  - Copie au presse-papiers
+
 ### Gestion des données
-- ✅ Historique automatique de tous les calculs
+- ✅ Historique automatique avec SQLite
 - ✅ Présets rapides (Standard, Réduit, Service)
+- ✅ Création de présets personnalisés
 - ✅ Modification/mise à jour des calculs existants
-- ✅ Export CSV de l'historique
+- ✅ Export global CSV et HTML
 - ✅ Statistiques complètes (moyenne, min, max, écart-type)
 
 ### Interface
@@ -24,6 +38,8 @@
 - ✅ Résultats en temps réel avec code couleur
 - ✅ Affichage des remises appliquées
 - ✅ Support du clavier (Enter pour calculer)
+- ✅ Thèmes Clair et Sombre
+- ✅ Menu contextuel sur historique
 
 ## 📋 Détails des calculs
 
@@ -108,26 +124,46 @@ dotnet run
 - **Marge nette** - Différence nette après TVA (€ et %)
 - **Remise appliquée** - Pourcentage et montant de remise
 
-## 💾 Historique
+## 💾 Historique & Base de données
 
-Les calculs sont **automatiquement sauvegardés** dans:
+Les calculs sont **automatiquement sauvegardés** dans une base de données SQLite:
 ```
-%AppData%\CalculatriceMarge\Historique\historique.txt
+%AppData%\CalculatriceMarge\Historique\historique.db
 ```
 
 ### Gestion de l'historique
-- Double-cliquer sur une ligne pour charger le calcul
-- Supprimer une ligne individuellement
-- Nettoyer tout l'historique
-- Export CSV disponible
+- **Double-cliquer** sur une ligne pour charger le calcul
+- **Clic-droit** pour menu contextuel :
+  - 📋 Copier dans le presse-papiers
+  - 📄 Exporter CSV
+  - 📊 Exporter HTML
+- **🗄️ Bouton Gestion Base de données** pour :
+  - Voir les statistiques et infos
+  - Créer des sauvegardes
+  - Restaurer depuis un backup
+  - Vérifier l'intégrité
+  - Optimiser la base (VACUUM)
+
+### Migration automatique
+- Les données de `historique.txt` sont automatiquement migrées vers SQLite
+- L'ancien fichier est conservé en backup
 
 ## 📈 Statistiques
 
+### Tableau de bord
 Affiche pour tous les calculs:
 - Nombre total de calculs
 - Chiffre d'affaires TTC total
 - Marge nette totale
 - Moyennes, min, max et écart-type (marge brute et nette)
+
+### Gestionnaire de base de données
+Accédez à des statistiques détaillées:
+- Taille et emplacement de la base
+- Version SQLite
+- Cumuls et moyennes
+- Dernière entrée
+- Informations de maintenance
 
 ## ⚙️ Paramètres avancés
 
@@ -186,15 +222,22 @@ CalculatriceMargeWPF/
 
 ## 📝 Notes de version
 
-### v2.2.0 (04/01/2026)
-- ✨ Interface complètement refactorisée (design compact et moderne)
-- ✨ Affichage des remises appliquées côte à côte avec Prix TTC
-- ✨ Recalcul des marges avec remises
-- ✨ Modification in-place de calculs existants (même position historique)
-- ✨ Validation souple des champs (valeurs par défaut)
-- ✨ Support complet du clavier (Enter pour calculer)
-- 🐛 Correction du calcul du montant de remise (sur prix initial)
-- 🐛 Amélioration de la gestion de l'historique (UTF-8)
+### v2.2.0 (14/01/2026)
+**🗄️ Base de données SQLite & Gestion avancée**
+- ✨ Intégration complète de **SQLite** pour historique robuste
+- ✨ **Gestionnaire de base de données intégré** avec 4 onglets:
+  - Informations et statistiques
+  - Sauvegarde manuelle et automatique
+  - Restauration et import
+  - Maintenance (VACUUM, Intégrité, Analyse)
+- ✨ **Export d'éléments individuels** via menu contextuel:
+  - Copie presse-papiers
+  - Export CSV sélectif
+  - Export HTML professionnel
+- ✨ Migration automatique depuis historique.txt
+- ✨ Menu restructuré avec "Outils" pour gestion BDD
+- 🐛 Correction tableau de bord pour synchronisation SQLite
+- 📖 Documentation complète (7 guides)
 
 ### v2.0.0
 - Refonte complète avec MVVM
@@ -203,7 +246,16 @@ CalculatriceMargeWPF/
 - Statistiques
 - Export CSV
 
-## 📧 Support
+## � Documentation
+
+Consultez les guides pour plus d'informations:
+- [SQLite Implementation](./docs/SQLITE_IMPLEMENTATION.md) - Architecture technique
+- [Database Manager](./docs/guides/DATABASE_MANAGER_GUIDE.md) - Gestionnaire de BDD
+- [Export Items](./docs/guides/EXPORT_INDIVIDUAL_ITEMS.md) - Export d'éléments
+- [Installer Guide](./docs/guides/INSTALLER_BUILD_GUIDE.md) - Création installeur
+- Voir tous les [guides](./docs/guides/README.md)
+
+## �📧 Support
 
 Pour toute question ou bug, consultez:
 - [Documentation complète](./README.md)
@@ -220,4 +272,4 @@ Voir [LICENSE.txt](LICENSE.txt)
 **Auteur: C.L (Skill Teams)**
 
 Version: **2.2.0**  
-Dernière mise à jour: 4 janvier 2026
+Dernière mise à jour: 14 janvier 2026
