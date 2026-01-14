@@ -273,39 +273,6 @@ namespace CalculatriceMargeWPF
                 // Récupérer le titre
                 result.Titre = string.IsNullOrWhiteSpace(txtTitre.Text) ? DEFAULT_TITLE : txtTitre.Text;
                 
-                // Vérifier les doublons
-                var existingResult = _resultsList.FirstOrDefault(r => r.Titre == result.Titre);
-                int indexHistorique = -1;
-                
-                if (existingResult != null)
-                {
-                    // Demander confirmation pour écraser
-                    var reponse = MessageBox.Show(
-                        $"Un calcul avec le titre \"{result.Titre}\" existe déjà.\n\nVoulez-vous le mettre à jour ?",
-                        "Confirmation",
-                        MessageBoxButton.YesNo,
-                        MessageBoxImage.Question);
-                    
-                    if (reponse == MessageBoxResult.No)
-                    {
-                        return; // Annuler
-                    }
-                    
-                    // Supprimer l'ancien de la liste
-                    _resultsList.Remove(existingResult);
-                    
-                    // Trouver l'index dans l'historique pour mise à jour
-                    for (int i = 0; i < lstHistorique.Items.Count; i++)
-                    {
-                        string item = lstHistorique.Items[i].ToString();
-                        if (item.StartsWith(result.Titre + " |"))
-                        {
-                            indexHistorique = i;
-                            break;
-                        }
-                    }
-                }
-                
                 // Ajouter aux résultats
                 _resultsList.Add(result);
                 _undoRedoManager.Push(result);
@@ -316,6 +283,24 @@ namespace CalculatriceMargeWPF
                 // Sauvegarder dans l'historique SQLite
                 try
                 {
+                    // D'abord vérifier si une entrée avec ce titre existe déjà dans la base
+                    var existingEntry = await _databaseService.GetEntryByTitleAsync(result.Titre);
+                    
+                    if (existingEntry != null)
+                    {
+                        // Demander confirmation pour la mise à jour
+                        var reponse = MessageBox.Show(
+                            $"Un calcul avec le titre \"{result.Titre}\" existe déjà dans l'historique.\n\nVoulez-vous le mettre à jour ?",
+                            "Confirmation de mise à jour",
+                            MessageBoxButton.YesNo,
+                            MessageBoxImage.Question);
+                        
+                        if (reponse == MessageBoxResult.No)
+                        {
+                            return; // Annuler la sauvegarde (affichage reste)
+                        }
+                    }
+
                     var historyEntry = new HistoryEntry
                     {
                         Titre = result.Titre,
@@ -333,20 +318,27 @@ namespace CalculatriceMargeWPF
                         DateCalcul = DateTime.Now
                     };
 
-                    // Vérifier si une entrée avec ce titre existe déjà dans la base
-                    var existingEntry = await _databaseService.GetEntryByTitleAsync(result.Titre);
-                    
                     if (existingEntry != null)
                     {
                         // Mettre à jour l'entrée existante
                         historyEntry.Id = existingEntry.Id;
-                        await _databaseService.UpdateEntryAsync(historyEntry);
+                        bool updated = await _databaseService.UpdateEntryAsync(historyEntry);
+                        
+                        if (!updated)
+                        {
+                            MessageBox.Show("Erreur lors de la mise à jour dans la base de données.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
                     }
                     else
                     {
                         // Ajouter une nouvelle entrée
                         long newId = await _databaseService.AddEntryAsync(historyEntry);
                         historyEntry.Id = (int)newId;
+                        
+                        if (newId > 0)
+                        {
+                            MessageBox.Show($"✅ Enregistré avec ID {newId}", "Debug", MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
                     }
 
                     // Recharger l'historique depuis la base
