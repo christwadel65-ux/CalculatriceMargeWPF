@@ -13,6 +13,7 @@ namespace CalculatriceMargeWPF.Models
         public double FraisGeneraux { get; set; }
         public int FraisModeIndex { get; set; } // 0 = %, 1 = EUR
         public double PrixVenteHT { get; set; }
+        public double RemisePourcentage { get; set; } // % de remise appliquée
         public double TVA { get; set; }
         public double PrixRevient { get; set; }
         public double MargeBrute { get; set; }

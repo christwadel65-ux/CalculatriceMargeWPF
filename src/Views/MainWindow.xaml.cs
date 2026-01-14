@@ -90,7 +90,7 @@ namespace CalculatriceMargeWPF
             // Marquer comme initialisé
             _isInitialized = true;
 
-            UpdateDashboard();
+            // UpdateDashboard sera appelé automatiquement à la fin de ChargerHistorique()
         }
 
         private void LoadPreferences()
@@ -245,6 +245,11 @@ namespace CalculatriceMargeWPF
                 }
 
                 _isLoadingHistory = false;
+                
+                // Forcer la mise à jour du tableau de bord après le chargement
+                _needsDashboardUpdate = true;
+                _cachedStats = null;
+                UpdateDashboard();
             }
             catch (Exception ex)
             {
@@ -285,20 +290,12 @@ namespace CalculatriceMargeWPF
                 {
                     // D'abord vérifier si une entrée avec ce titre existe déjà dans la base
                     var existingEntry = await _databaseService.GetEntryByTitleAsync(result.Titre);
-                    
-                    if (existingEntry != null)
+
+                    // Récupérer la remise si elle existe
+                    double remisePourcentage = 0;
+                    if (NumberFormatter.TryParseFormattedNumber(txtRemise.Text, out double remise))
                     {
-                        // Demander confirmation pour la mise à jour
-                        var reponse = MessageBox.Show(
-                            $"Un calcul avec le titre \"{result.Titre}\" existe déjà dans l'historique.\n\nVoulez-vous le mettre à jour ?",
-                            "Confirmation de mise à jour",
-                            MessageBoxButton.YesNo,
-                            MessageBoxImage.Question);
-                        
-                        if (reponse == MessageBoxResult.No)
-                        {
-                            return; // Annuler la sauvegarde (affichage reste)
-                        }
+                        remisePourcentage = remise;
                     }
 
                     var historyEntry = new HistoryEntry
@@ -308,6 +305,7 @@ namespace CalculatriceMargeWPF
                         FraisGeneraux = fraisGenerauxPct,
                         FraisModeIndex = fraisEnPourcent ? 0 : 1,
                         PrixVenteHT = result.PrixVenteHT,
+                        RemisePourcentage = remisePourcentage,
                         TVA = tva,
                         PrixRevient = result.PrixRevientTotal,
                         MargeBrute = result.MargeBruteEuro,
@@ -320,36 +318,24 @@ namespace CalculatriceMargeWPF
 
                     if (existingEntry != null)
                     {
-                        // Mettre à jour l'entrée existante
+                        // Mettre à jour l'entrée existante sans demander
                         historyEntry.Id = existingEntry.Id;
-                        bool updated = await _databaseService.UpdateEntryAsync(historyEntry);
-                        
-                        if (!updated)
-                        {
-                            MessageBox.Show("Erreur lors de la mise à jour dans la base de données.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
+                        await _databaseService.UpdateEntryAsync(historyEntry);
                     }
                     else
                     {
                         // Ajouter une nouvelle entrée
                         long newId = await _databaseService.AddEntryAsync(historyEntry);
                         historyEntry.Id = (int)newId;
-                        
-                        if (newId > 0)
-                        {
-                            MessageBox.Show($"✅ Enregistré avec ID {newId}", "Debug", MessageBoxButton.OK, MessageBoxImage.Information);
-                        }
                     }
 
-                    // Recharger l'historique depuis la base
+                    // Recharger l'historique depuis la base (qui appelle UpdateDashboard)
                     ChargerHistorique();
                 }
                 catch (Exception exHist)
                 {
                     MessageBox.Show($"Erreur lors de la sauvegarde dans l'historique:\n{exHist.Message}", "Avertissement", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
-
-                UpdateDashboard();
             }
             catch (ArgumentException ex)
             {
@@ -463,7 +449,7 @@ namespace CalculatriceMargeWPF
             }
         }
 
-        private void btnCalculInverse_Click(object sender, RoutedEventArgs e)
+        private async void btnCalculInverse_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -527,8 +513,59 @@ namespace CalculatriceMargeWPF
                 _resultsList.Add(result);
                 _undoRedoManager.Push(result);
                 AfficherResultats(result);
-                UpdateDashboard();
                 txtDebourse.Text = result.DebourseSec.ToString("F2");
+
+                // Sauvegarder dans l'historique SQLite
+                try
+                {
+                    // Vérifier si une entrée avec ce titre existe déjà
+                    var existingEntry = await _databaseService.GetEntryByTitleAsync(result.Titre);
+
+                    // Récupérer la remise si elle existe
+                    double remisePourcentage = 0;
+                    if (NumberFormatter.TryParseFormattedNumber(txtRemise.Text, out double remise))
+                    {
+                        remisePourcentage = remise;
+                    }
+
+                    var historyEntry = new HistoryEntry
+                    {
+                        Titre = result.Titre,
+                        DebourseSec = result.DebourseSec,
+                        FraisGeneraux = fraisGeneraux,
+                        FraisModeIndex = fraisEnPourcent ? 0 : 1,
+                        PrixVenteHT = result.PrixVenteHT,
+                        RemisePourcentage = remisePourcentage,
+                        TVA = tva,
+                        PrixRevient = result.PrixRevientTotal,
+                        MargeBrute = result.MargeBruteEuro,
+                        MargeBrutePourcentage = result.MargeBrutePct,
+                        MargeNette = result.MargeNetteEuro,
+                        MargeNettePourcentage = result.MargeNettePct,
+                        PrixVenteTTC = result.PrixVenteTTC,
+                        DateCalcul = DateTime.Now
+                    };
+
+                    if (existingEntry != null)
+                    {
+                        // Mettre à jour l'entrée existante sans demander
+                        historyEntry.Id = existingEntry.Id;
+                        await _databaseService.UpdateEntryAsync(historyEntry);
+                    }
+                    else
+                    {
+                        // Ajouter une nouvelle entrée
+                        long newId = await _databaseService.AddEntryAsync(historyEntry);
+                        historyEntry.Id = (int)newId;
+                    }
+
+                    // Recharger l'historique depuis la base (qui appelle UpdateDashboard)
+                    ChargerHistorique();
+                }
+                catch (Exception exHist)
+                {
+                    MessageBox.Show($"Erreur lors de la sauvegarde dans l'historique:\n{exHist.Message}", "Avertissement", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
             }
             catch (Exception ex)
             {

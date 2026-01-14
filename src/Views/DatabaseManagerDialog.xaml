@@ -342,12 +342,18 @@
                                   CanUserDeleteRows="False"
                                   IsReadOnly="True">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Titre" Binding="{Binding Titre}" Width="200"/>
-                                <DataGridTextColumn Header="Date" Binding="{Binding DateCalcul, StringFormat=dd/MM/yyyy HH:mm}" Width="150"/>
-                                <DataGridTextColumn Header="Déboursé" Binding="{Binding DebourseSec, StringFormat=F2}" Width="100"/>
-                                <DataGridTextColumn Header="Prix HT" Binding="{Binding PrixVenteHT, StringFormat=F2}" Width="100"/>
-                                <DataGridTextColumn Header="Marge %" Binding="{Binding MargeBrutePourcentage, StringFormat=F2}" Width="80"/>
-                                <DataGridTextColumn Header="TVA" Binding="{Binding TVA, StringFormat=F2}" Width="60"/>
+                                <DataGridTextColumn Header="Titre" Binding="{Binding Titre}" Width="150"/>
+                                <DataGridTextColumn Header="Date" Binding="{Binding DateCalcul, StringFormat=dd/MM/yyyy HH:mm}" Width="130"/>
+                                <DataGridTextColumn Header="Déboursé" Binding="{Binding DebourseSec, StringFormat=F2}" Width="90"/>
+                                <DataGridTextColumn Header="Frais G." Binding="{Binding FraisGeneraux, StringFormat=F2}" Width="80"/>
+                                <DataGridTextColumn Header="Prix HT" Binding="{Binding PrixVenteHT, StringFormat=F2}" Width="90"/>
+                                <DataGridTextColumn Header="Remise %" Binding="{Binding RemisePourcentage, StringFormat=F2}" Width="70"/>
+                                <DataGridTextColumn Header="Prix TTC" Binding="{Binding PrixVenteTTC, StringFormat=F2}" Width="90"/>
+                                <DataGridTextColumn Header="TVA %" Binding="{Binding TVA, StringFormat=F2}" Width="60"/>
+                                <DataGridTextColumn Header="Marge B." Binding="{Binding MargeBrute, StringFormat=F2}" Width="90"/>
+                                <DataGridTextColumn Header="Marge B %" Binding="{Binding MargeBrutePourcentage, StringFormat=F2}" Width="80"/>
+                                <DataGridTextColumn Header="Marge N." Binding="{Binding MargeNette, StringFormat=F2}" Width="90"/>
+                                <DataGridTextColumn Header="Marge N %" Binding="{Binding MargeNettePourcentage, StringFormat=F2}" Width="80"/>
                             </DataGrid.Columns>
                         </DataGrid>
 

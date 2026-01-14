@@ -38,6 +38,7 @@ namespace CalculatriceMargeWPF.Models
                     FraisGeneraux REAL NOT NULL,
                     FraisModeIndex INTEGER NOT NULL,
                     PrixVenteHT REAL NOT NULL,
+                    RemisePourcentage REAL DEFAULT 0,
                     TVA REAL NOT NULL,
                     PrixRevient REAL NOT NULL,
                     MargeBrute REAL NOT NULL,
@@ -65,11 +66,11 @@ namespace CalculatriceMargeWPF.Models
             var command = connection.CreateCommand();
             command.CommandText = @"
                 INSERT INTO History (Titre, DebourseSec, FraisGeneraux, FraisModeIndex, 
-                                    PrixVenteHT, TVA, PrixRevient, MargeBrute, 
+                                    PrixVenteHT, RemisePourcentage, TVA, PrixRevient, MargeBrute, 
                                     MargeBrutePourcentage, MargeNette, MargeNettePourcentage,
                                     PrixVenteTTC, DateCalcul)
                 VALUES ($titre, $debourseSec, $fraisGeneraux, $fraisModeIndex,
-                        $prixVenteHT, $tva, $prixRevient, $margeBrute,
+                        $prixVenteHT, $remisePourcentage, $tva, $prixRevient, $margeBrute,
                         $margeBrutePourcentage, $margeNette, $margeNettePourcentage,
                         $prixVenteTTC, $dateCalcul)
             ";
@@ -79,6 +80,7 @@ namespace CalculatriceMargeWPF.Models
             command.Parameters.AddWithValue("$fraisGeneraux", entry.FraisGeneraux);
             command.Parameters.AddWithValue("$fraisModeIndex", entry.FraisModeIndex);
             command.Parameters.AddWithValue("$prixVenteHT", entry.PrixVenteHT);
+            command.Parameters.AddWithValue("$remisePourcentage", entry.RemisePourcentage);
             command.Parameters.AddWithValue("$tva", entry.TVA);
             command.Parameters.AddWithValue("$prixRevient", entry.PrixRevient);
             command.Parameters.AddWithValue("$margeBrute", entry.MargeBrute);
@@ -107,7 +109,7 @@ namespace CalculatriceMargeWPF.Models
             var command = connection.CreateCommand();
             command.CommandText = @"
                 SELECT Id, Titre, DebourseSec, FraisGeneraux, FraisModeIndex,
-                       PrixVenteHT, TVA, PrixRevient, MargeBrute, MargeBrutePourcentage,
+                       PrixVenteHT, RemisePourcentage, TVA, PrixRevient, MargeBrute, MargeBrutePourcentage,
                        MargeNette, MargeNettePourcentage, PrixVenteTTC, DateCalcul
                 FROM History
                 ORDER BY DateCalcul DESC
@@ -124,14 +126,15 @@ namespace CalculatriceMargeWPF.Models
                     FraisGeneraux = reader.GetDouble(3),
                     FraisModeIndex = reader.GetInt32(4),
                     PrixVenteHT = reader.GetDouble(5),
-                    TVA = reader.GetDouble(6),
-                    PrixRevient = reader.GetDouble(7),
-                    MargeBrute = reader.GetDouble(8),
-                    MargeBrutePourcentage = reader.GetDouble(9),
-                    MargeNette = reader.GetDouble(10),
-                    MargeNettePourcentage = reader.GetDouble(11),
-                    PrixVenteTTC = reader.GetDouble(12),
-                    DateCalcul = DateTime.Parse(reader.GetString(13))
+                    RemisePourcentage = reader.IsDBNull(6) ? 0 : reader.GetDouble(6),
+                    TVA = reader.GetDouble(7),
+                    PrixRevient = reader.GetDouble(8),
+                    MargeBrute = reader.GetDouble(9),
+                    MargeBrutePourcentage = reader.GetDouble(10),
+                    MargeNette = reader.GetDouble(11),
+                    MargeNettePourcentage = reader.GetDouble(12),
+                    PrixVenteTTC = reader.GetDouble(13),
+                    DateCalcul = DateTime.Parse(reader.GetString(14))
                 });
             }
 
@@ -177,7 +180,7 @@ namespace CalculatriceMargeWPF.Models
             var command = connection.CreateCommand();
             command.CommandText = @"
                 SELECT Id, Titre, DebourseSec, FraisGeneraux, FraisModeIndex,
-                       PrixVenteHT, TVA, PrixRevient, MargeBrute, MargeBrutePourcentage,
+                       PrixVenteHT, RemisePourcentage, TVA, PrixRevient, MargeBrute, MargeBrutePourcentage,
                        MargeNette, MargeNettePourcentage, PrixVenteTTC, DateCalcul
                 FROM History
                 WHERE Id = $id
@@ -195,14 +198,15 @@ namespace CalculatriceMargeWPF.Models
                     FraisGeneraux = reader.GetDouble(3),
                     FraisModeIndex = reader.GetInt32(4),
                     PrixVenteHT = reader.GetDouble(5),
-                    TVA = reader.GetDouble(6),
-                    PrixRevient = reader.GetDouble(7),
-                    MargeBrute = reader.GetDouble(8),
-                    MargeBrutePourcentage = reader.GetDouble(9),
-                    MargeNette = reader.GetDouble(10),
-                    MargeNettePourcentage = reader.GetDouble(11),
-                    PrixVenteTTC = reader.GetDouble(12),
-                    DateCalcul = DateTime.Parse(reader.GetString(13))
+                    RemisePourcentage = reader.IsDBNull(6) ? 0 : reader.GetDouble(6),
+                    TVA = reader.GetDouble(7),
+                    PrixRevient = reader.GetDouble(8),
+                    MargeBrute = reader.GetDouble(9),
+                    MargeBrutePourcentage = reader.GetDouble(10),
+                    MargeNette = reader.GetDouble(11),
+                    MargeNettePourcentage = reader.GetDouble(12),
+                    PrixVenteTTC = reader.GetDouble(13),
+                    DateCalcul = DateTime.Parse(reader.GetString(14))
                 };
             }
 
@@ -222,7 +226,7 @@ namespace CalculatriceMargeWPF.Models
             var command = connection.CreateCommand();
             command.CommandText = @"
                 SELECT Id, Titre, DebourseSec, FraisGeneraux, FraisModeIndex,
-                       PrixVenteHT, TVA, PrixRevient, MargeBrute, MargeBrutePourcentage,
+                       PrixVenteHT, RemisePourcentage, TVA, PrixRevient, MargeBrute, MargeBrutePourcentage,
                        MargeNette, MargeNettePourcentage, PrixVenteTTC, DateCalcul
                 FROM History
                 WHERE Titre LIKE $searchTerm
@@ -241,14 +245,15 @@ namespace CalculatriceMargeWPF.Models
                     FraisGeneraux = reader.GetDouble(3),
                     FraisModeIndex = reader.GetInt32(4),
                     PrixVenteHT = reader.GetDouble(5),
-                    TVA = reader.GetDouble(6),
-                    PrixRevient = reader.GetDouble(7),
-                    MargeBrute = reader.GetDouble(8),
-                    MargeBrutePourcentage = reader.GetDouble(9),
-                    MargeNette = reader.GetDouble(10),
-                    MargeNettePourcentage = reader.GetDouble(11),
-                    PrixVenteTTC = reader.GetDouble(12),
-                    DateCalcul = DateTime.Parse(reader.GetString(13))
+                    RemisePourcentage = reader.IsDBNull(6) ? 0 : reader.GetDouble(6),
+                    TVA = reader.GetDouble(7),
+                    PrixRevient = reader.GetDouble(8),
+                    MargeBrute = reader.GetDouble(9),
+                    MargeBrutePourcentage = reader.GetDouble(10),
+                    MargeNette = reader.GetDouble(11),
+                    MargeNettePourcentage = reader.GetDouble(12),
+                    PrixVenteTTC = reader.GetDouble(13),
+                    DateCalcul = DateTime.Parse(reader.GetString(14))
                 });
             }
 
@@ -266,7 +271,7 @@ namespace CalculatriceMargeWPF.Models
             var command = connection.CreateCommand();
             command.CommandText = @"
                 SELECT Id, Titre, DebourseSec, FraisGeneraux, FraisModeIndex,
-                       PrixVenteHT, TVA, PrixRevient, MargeBrute, MargeBrutePourcentage,
+                       PrixVenteHT, RemisePourcentage, TVA, PrixRevient, MargeBrute, MargeBrutePourcentage,
                        MargeNette, MargeNettePourcentage, PrixVenteTTC, DateCalcul
                 FROM History
                 WHERE Titre = $titre
@@ -285,14 +290,15 @@ namespace CalculatriceMargeWPF.Models
                     FraisGeneraux = reader.GetDouble(3),
                     FraisModeIndex = reader.GetInt32(4),
                     PrixVenteHT = reader.GetDouble(5),
-                    TVA = reader.GetDouble(6),
-                    PrixRevient = reader.GetDouble(7),
-                    MargeBrute = reader.GetDouble(8),
-                    MargeBrutePourcentage = reader.GetDouble(9),
-                    MargeNette = reader.GetDouble(10),
-                    MargeNettePourcentage = reader.GetDouble(11),
-                    PrixVenteTTC = reader.GetDouble(12),
-                    DateCalcul = DateTime.Parse(reader.GetString(13))
+                    RemisePourcentage = reader.IsDBNull(6) ? 0 : reader.GetDouble(6),
+                    TVA = reader.GetDouble(7),
+                    PrixRevient = reader.GetDouble(8),
+                    MargeBrute = reader.GetDouble(9),
+                    MargeBrutePourcentage = reader.GetDouble(10),
+                    MargeNette = reader.GetDouble(11),
+                    MargeNettePourcentage = reader.GetDouble(12),
+                    PrixVenteTTC = reader.GetDouble(13),
+                    DateCalcul = DateTime.Parse(reader.GetString(14))
                 };
             }
 
@@ -315,6 +321,7 @@ namespace CalculatriceMargeWPF.Models
                     FraisGeneraux = $fraisGeneraux,
                     FraisModeIndex = $fraisModeIndex,
                     PrixVenteHT = $prixVenteHT,
+                    RemisePourcentage = $remisePourcentage,
                     TVA = $tva,
                     PrixRevient = $prixRevient,
                     MargeBrute = $margeBrute,
@@ -332,6 +339,7 @@ namespace CalculatriceMargeWPF.Models
             command.Parameters.AddWithValue("$fraisGeneraux", entry.FraisGeneraux);
             command.Parameters.AddWithValue("$fraisModeIndex", entry.FraisModeIndex);
             command.Parameters.AddWithValue("$prixVenteHT", entry.PrixVenteHT);
+            command.Parameters.AddWithValue("$remisePourcentage", entry.RemisePourcentage);
             command.Parameters.AddWithValue("$tva", entry.TVA);
             command.Parameters.AddWithValue("$prixRevient", entry.PrixRevient);
             command.Parameters.AddWithValue("$margeBrute", entry.MargeBrute);
