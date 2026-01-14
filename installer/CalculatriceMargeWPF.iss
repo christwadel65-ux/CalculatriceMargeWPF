@@ -38,6 +38,8 @@ VersionInfoVersion={#MyAppVersion}
 VersionInfoCompany={#MyAppPublisher}
 VersionInfoProductName={#MyAppName}
 VersionInfoProductVersion={#MyAppVersion}
+CloseApplications=yes
+RestartApplications=yes
 
 [Languages]
 Name: "fr"; MessagesFile: "compiler:Languages\French.isl"
@@ -71,11 +73,68 @@ Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: 
 Filename: "{app}\{#MyAppExeName}"; Description: "Lancer {#MyAppName} maintenant"; Flags: nowait postinstall skipifsilent
 
 [Code]
-procedure CurStepChanged(CurStep: TSetupStep);
+procedure InitializeWizard();
+var
+  PreviousVersionInstalled: Boolean;
+  PreviousPath: string;
+  PathToOldExe: string;
 begin
+  { Vérifier si une version antérieure est installée }
+  PreviousVersionInstalled := RegQueryStringValue(HKEY_LOCAL_MACHINE, 
+    'Software\Microsoft\Windows\CurrentVersion\Uninstall\' + ExpandConstant('{#MyAppName}') + '_is1',
+    'InstallLocation', PreviousPath);
+  
+  if PreviousVersionInstalled and (PreviousPath <> '') then
+  begin
+    PathToOldExe := PreviousPath + 'CalculatriceMargeWPF.exe';
+    
+    { Avertir l'utilisateur qu'une version antérieure a été détectée }
+    if MsgBox('✅ Détection de version antérieure' + #13#10 + #13#10 +
+              'Une version antérieure de CalculatriceMarge a été trouvée.' + #13#10 + #13#10 +
+              'Installation détectée : ' + PreviousPath + #13#10 + #13#10 +
+              'La nouvelle version v2.2.0 sera installée en MISE À JOUR.' + #13#10 +
+              'Vos données historiques seront préservées.' + #13#10 + #13#10 +
+              'Voulez-vous continuer ?',
+              mbConfirmation, MB_YESNO) = IDNO then
+    begin
+      Abort();
+    end;
+  end;
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
+var
+  ApplicationPath: string;
+  ProgramRunning: Boolean;
+begin
+  { Avant l'installation, vérifier que le programme n'est pas en cours d'exécution }
+  if CurStep = ssInstall then
+  begin
+    ApplicationPath := ExpandConstant('{app}\{#MyAppExeName}');
+    
+    { Tentative de suppression du fichier exécutable (échoue s'il est en cours d'exécution) }
+    if FileExists(ApplicationPath) then
+    begin
+      if not DeleteFile(ApplicationPath) then
+      begin
+        ProgramRunning := True;
+        
+        if MsgBox('⚠️ Le programme est en cours d''exécution' + #13#10 + #13#10 +
+                  'Impossible de mettre à jour CalculatriceMarge tant qu''il est ouvert.' + #13#10 + #13#10 +
+                  'Veuillez fermer le programme et relancer l''installation.' + #13#10 +
+                  'Appuyez sur OUI après avoir fermé le programme.',
+                  mbConfirmation, MB_YESNO) = IDNO then
+        begin
+          Abort();
+        end;
+      end;
+    end;
+  end;
+  
+  { Message de succès après l'installation }
   if CurStep = ssPostInstall then
   begin
-    MsgBox('Installation terminée !' + #13#10 + #13#10 + 
+    MsgBox('✅ Installation/Mise à jour réussie !' + #13#10 + #13#10 + 
            'Version 2.2.0 avec base de données SQLite intégrée.' + #13#10 + #13#10 +
            'Nouveautés :' + #13#10 +
            '• Historique robuste et performant' + #13#10 +
