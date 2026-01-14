@@ -333,15 +333,21 @@ namespace CalculatriceMargeWPF
                         DateCalcul = DateTime.Now
                     };
 
-                    if (indexHistorique >= 0 && _historyEntryMap.ContainsKey(indexHistorique))
+                    // Vérifier si une entrée avec ce titre existe déjà dans la base
+                    var existingEntry = await _databaseService.GetEntryByTitleAsync(result.Titre);
+                    
+                    if (existingEntry != null)
                     {
                         // Mettre à jour l'entrée existante
-                        var existingEntry = _historyEntryMap[indexHistorique];
-                        await _databaseService.DeleteEntryAsync(existingEntry.Id);
+                        historyEntry.Id = existingEntry.Id;
+                        await _databaseService.UpdateEntryAsync(historyEntry);
                     }
-
-                    long newId = await _databaseService.AddEntryAsync(historyEntry);
-                    historyEntry.Id = (int)newId;
+                    else
+                    {
+                        // Ajouter une nouvelle entrée
+                        long newId = await _databaseService.AddEntryAsync(historyEntry);
+                        historyEntry.Id = (int)newId;
+                    }
 
                     // Recharger l'historique depuis la base
                     ChargerHistorique();

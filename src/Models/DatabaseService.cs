@@ -256,6 +256,95 @@ namespace CalculatriceMargeWPF.Models
         }
 
         /// <summary>
+        /// Récupère une entrée par son titre exact
+        /// </summary>
+        public HistoryEntry GetEntryByTitle(string titre)
+        {
+            using var connection = new SqliteConnection($"Data Source={_databasePath}");
+            connection.Open();
+
+            var command = connection.CreateCommand();
+            command.CommandText = @"
+                SELECT Id, Titre, DebourseSec, FraisGeneraux, FraisModeIndex,
+                       PrixVenteHT, TVA, PrixRevient, MargeBrute, MargeBrutePourcentage,
+                       MargeNette, MargeNettePourcentage, PrixVenteTTC, DateCalcul
+                FROM History
+                WHERE Titre = $titre
+                LIMIT 1
+            ";
+            command.Parameters.AddWithValue("$titre", titre);
+
+            using var reader = command.ExecuteReader();
+            if (reader.Read())
+            {
+                return new HistoryEntry
+                {
+                    Id = reader.GetInt32(0),
+                    Titre = reader.GetString(1),
+                    DebourseSec = reader.GetDouble(2),
+                    FraisGeneraux = reader.GetDouble(3),
+                    FraisModeIndex = reader.GetInt32(4),
+                    PrixVenteHT = reader.GetDouble(5),
+                    TVA = reader.GetDouble(6),
+                    PrixRevient = reader.GetDouble(7),
+                    MargeBrute = reader.GetDouble(8),
+                    MargeBrutePourcentage = reader.GetDouble(9),
+                    MargeNette = reader.GetDouble(10),
+                    MargeNettePourcentage = reader.GetDouble(11),
+                    PrixVenteTTC = reader.GetDouble(12),
+                    DateCalcul = DateTime.Parse(reader.GetString(13))
+                };
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Met à jour une entrée existante
+        /// </summary>
+        public bool UpdateEntry(HistoryEntry entry)
+        {
+            using var connection = new SqliteConnection($"Data Source={_databasePath}");
+            connection.Open();
+
+            var command = connection.CreateCommand();
+            command.CommandText = @"
+                UPDATE History SET
+                    Titre = $titre,
+                    DebourseSec = $debourseSec,
+                    FraisGeneraux = $fraisGeneraux,
+                    FraisModeIndex = $fraisModeIndex,
+                    PrixVenteHT = $prixVenteHT,
+                    TVA = $tva,
+                    PrixRevient = $prixRevient,
+                    MargeBrute = $margeBrute,
+                    MargeBrutePourcentage = $margeBrutePourcentage,
+                    MargeNette = $margeNette,
+                    MargeNettePourcentage = $margeNettePourcentage,
+                    PrixVenteTTC = $prixVenteTTC,
+                    DateCalcul = $dateCalcul
+                WHERE Id = $id
+            ";
+
+            command.Parameters.AddWithValue("$id", entry.Id);
+            command.Parameters.AddWithValue("$titre", entry.Titre);
+            command.Parameters.AddWithValue("$debourseSec", entry.DebourseSec);
+            command.Parameters.AddWithValue("$fraisGeneraux", entry.FraisGeneraux);
+            command.Parameters.AddWithValue("$fraisModeIndex", entry.FraisModeIndex);
+            command.Parameters.AddWithValue("$prixVenteHT", entry.PrixVenteHT);
+            command.Parameters.AddWithValue("$tva", entry.TVA);
+            command.Parameters.AddWithValue("$prixRevient", entry.PrixRevient);
+            command.Parameters.AddWithValue("$margeBrute", entry.MargeBrute);
+            command.Parameters.AddWithValue("$margeBrutePourcentage", entry.MargeBrutePourcentage);
+            command.Parameters.AddWithValue("$margeNette", entry.MargeNette);
+            command.Parameters.AddWithValue("$margeNettePourcentage", entry.MargeNettePourcentage);
+            command.Parameters.AddWithValue("$prixVenteTTC", entry.PrixVenteTTC);
+            command.Parameters.AddWithValue("$dateCalcul", entry.DateCalcul.ToString("yyyy-MM-dd HH:mm:ss"));
+
+            return command.ExecuteNonQuery() > 0;
+        }
+
+        /// <summary>
         /// Récupère les statistiques de l'historique
         /// </summary>
         public (int Count, double TotalMargeBrute, double TotalMargeNette, double AvgMargeBrutePct, double AvgMargeNettePct) GetStatistics()
@@ -322,6 +411,22 @@ namespace CalculatriceMargeWPF.Models
         public async Task<(int Count, double TotalMargeBrute, double TotalMargeNette, double AvgMargeBrutePct, double AvgMargeNettePct)> GetStatisticsAsync()
         {
             return await Task.Run(() => GetStatistics());
+        }
+
+        /// <summary>
+        /// Récupère une entrée par titre de manière asynchrone
+        /// </summary>
+        public async Task<HistoryEntry> GetEntryByTitleAsync(string titre)
+        {
+            return await Task.Run(() => GetEntryByTitle(titre));
+        }
+
+        /// <summary>
+        /// Met à jour une entrée de manière asynchrone
+        /// </summary>
+        public async Task<bool> UpdateEntryAsync(HistoryEntry entry)
+        {
+            return await Task.Run(() => UpdateEntry(entry));
         }
 
         /// <summary>
