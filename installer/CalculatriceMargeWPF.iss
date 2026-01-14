@@ -115,7 +115,7 @@ begin
                   'Cette action est IRRÉVERSIBLE.' + #13#10 + #13#10 +
                   'Êtes-vous absolument sûr de vouloir supprimer la base de données ?' + #13#10 +
                   'Dossier à supprimer : ' + DataFolder,
-                  mbWarning, MB_YESNO) = IDYES then
+                  mbConfirmation, MB_YESNO) = IDYES then
         begin
           { Supprimer toute la base de données et les dossiers }
           if DelTree(DataFolder, True, True, True) then
