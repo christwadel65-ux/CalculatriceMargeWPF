@@ -77,25 +77,71 @@ procedure InitializeWizard();
 var
   PreviousVersionInstalled: Boolean;
   PreviousPath: string;
-  PathToOldExe: string;
+  UninstallExePath: string;
+  UninstallString: string;
+  ResultCode: Integer;
 begin
-  { Vérifier si une version antérieure est installée }
+  { Vérifier si une version antérieure est installée dans la registre }
   PreviousVersionInstalled := RegQueryStringValue(HKEY_LOCAL_MACHINE, 
-    'Software\Microsoft\Windows\CurrentVersion\Uninstall\' + ExpandConstant('{#MyAppName}') + '_is1',
+    'Software\Microsoft\Windows\CurrentVersion\Uninstall\CalculatriceMarge_is1',
     'InstallLocation', PreviousPath);
   
   if PreviousVersionInstalled and (PreviousPath <> '') then
   begin
-    PathToOldExe := PreviousPath + 'CalculatriceMargeWPF.exe';
+    { Essayer de récupérer le chemin de désinstallation }
+    if not RegQueryStringValue(HKEY_LOCAL_MACHINE,
+      'Software\Microsoft\Windows\CurrentVersion\Uninstall\CalculatriceMarge_is1',
+      'UninstallString', UninstallString) then
+    begin
+      { Si pas de UninstallString, vérifier dans CommonFiles }
+      UninstallExePath := ExpandConstant('{commonfil32}\CalculatriceMarge\unins000.exe');
+      if not FileExists(UninstallExePath) then
+        UninstallExePath := PreviousPath + 'unins000.exe';
+    end
+    else
+    begin
+      { Utiliser le chemin de UninstallString }
+      UninstallExePath := UninstallString;
+    end;
     
     { Avertir l'utilisateur qu'une version antérieure a été détectée }
     if MsgBox('✅ Détection de version antérieure' + #13#10 + #13#10 +
               'Une version antérieure de CalculatriceMarge a été trouvée.' + #13#10 + #13#10 +
               'Installation détectée : ' + PreviousPath + #13#10 + #13#10 +
-              'La nouvelle version v2.2.0 sera installée en MISE À JOUR.' + #13#10 +
+              'La version actuelle va être désinstallée et remplacée par v2.2.0.' + #13#10 +
               'Vos données historiques seront préservées.' + #13#10 + #13#10 +
               'Voulez-vous continuer ?',
-              mbConfirmation, MB_YESNO) = IDNO then
+              mbConfirmation, MB_YESNO) = IDYES then
+    begin
+      { Désinstaller silencieusement l'ancienne version }
+      if FileExists(UninstallExePath) then
+      begin
+        if Exec(UninstallExePath, '/SILENT /NORESTART', '', SW_SHOW, ewWaitUntilTerminated, ResultCode) then
+        begin
+          { La désinstallation s'est bien passée }
+          MsgBox('✅ Ancien programme désinstallé' + #13#10 + #13#10 +
+                 'Vous pouvez maintenant continuer avec l''installation de v2.2.0.',
+                 mbInformation, MB_OK);
+        end
+        else
+        begin
+          { Erreur lors de la désinstallation }
+          MsgBox('⚠️ Erreur lors de la désinstallation' + #13#10 + #13#10 +
+                 'Impossible de désinstaller l''ancienne version.' + #13#10 +
+                 'Code d''erreur : ' + IntToStr(ResultCode) + #13#10 + #13#10 +
+                 'Voulez-vous quand même continuer avec l''installation ?',
+                 mbError, MB_YESNO);
+        end;
+      end
+      else
+      begin
+        MsgBox('⚠️ Programme de désinstallation non trouvé' + #13#10 + #13#10 +
+               'Localisation supposée : ' + UninstallExePath + #13#10 + #13#10 +
+               'L''ancienne version sera remplacée par les nouveaux fichiers.',
+               mbError, MB_OK);
+      end;
+    end
+    else
     begin
       Abort();
     end;
@@ -105,28 +151,23 @@ end;
 procedure CurStepChanged(CurStep: TSetupStep);
 var
   ApplicationPath: string;
-  ProgramRunning: Boolean;
 begin
-  { Avant l'installation, vérifier que le programme n'est pas en cours d'exécution }
+  { Avant l'installation, nettoyer les anciens fichiers }
   if CurStep = ssInstall then
   begin
     ApplicationPath := ExpandConstant('{app}\{#MyAppExeName}');
     
-    { Tentative de suppression du fichier exécutable (échoue s'il est en cours d'exécution) }
+    { Essayer de supprimer l'ancien exécutable pour libérer la place }
     if FileExists(ApplicationPath) then
     begin
       if not DeleteFile(ApplicationPath) then
       begin
-        ProgramRunning := True;
-        
-        if MsgBox('⚠️ Le programme est en cours d''exécution' + #13#10 + #13#10 +
-                  'Impossible de mettre à jour CalculatriceMarge tant qu''il est ouvert.' + #13#10 + #13#10 +
-                  'Veuillez fermer le programme et relancer l''installation.' + #13#10 +
-                  'Appuyez sur OUI après avoir fermé le programme.',
-                  mbConfirmation, MB_YESNO) = IDNO then
-        begin
-          Abort();
-        end;
+        MsgBox('⚠️ Le programme est en cours d''exécution' + #13#10 + #13#10 +
+                'Impossible de remplacer le programme tant qu''il est ouvert.' + #13#10 + #13#10 +
+                'Veuillez fermer CalculatriceMarge complètement et relancer l''installation.' + #13#10 +
+                'Cliquez OK après avoir fermé le programme.',
+                mbError, MB_OK);
+        Abort();
       end;
     end;
   end;
