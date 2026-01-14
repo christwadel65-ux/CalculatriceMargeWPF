@@ -365,7 +365,7 @@
                 <Border Style="{StaticResource Card}">
                     <StackPanel>
                         <TextBlock Text="📋 Historique" Style="{StaticResource SectionTitle}"/>
-                        <ListBox x:Name="lstHistorique" Height="70" Background="White" BorderBrush="#D5DBDB" BorderThickness="1" FontSize="10" Padding="6" MouseDoubleClick="lstHistorique_MouseDoubleClick">
+                        <ListBox x:Name="lstHistorique" Height="70" Background="White" BorderBrush="#D5DBDB" BorderThickness="1" FontSize="10" Padding="6" MouseDoubleClick="lstHistorique_MouseDoubleClick" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
                             <ListBox.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Header="📋 Copier dans le presse-papiers" Click="lstHistorique_CopyToClipboard"/>

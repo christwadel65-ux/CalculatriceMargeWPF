@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using CalculatriceMargeWPF.Models;
@@ -33,6 +34,11 @@ namespace CalculatriceMargeWPF
         private PreferencesManager _preferencesManager;
         private System.Windows.Threading.DispatcherTimer _autoSaveTimer;
         private bool _isInitialized = false;
+        
+        // Optimisation des performances
+        private bool _isLoadingHistory = false;
+        private CalculationEngine.Statistics _cachedStats = null;
+        private bool _needsDashboardUpdate = false;
 
         public MainWindow()
         {
@@ -189,15 +195,23 @@ namespace CalculatriceMargeWPF
             }
         }
 
-        private void ChargerHistorique()
+        private async void ChargerHistorique()
         {
             try
             {
+                // Éviter les rechargements inutiles
+                if (_isLoadingHistory)
+                    return;
+
+                _isLoadingHistory = true;
+
                 lstHistorique.Items.Clear();
                 _historyEntryMap.Clear();
                 _resultsList.Clear();
+                _cachedStats = null; // Invalider le cache
+                _needsDashboardUpdate = true;
 
-                var entries = _databaseService.GetAllEntries();
+                var entries = await _databaseService.GetAllEntriesAsync();
                 int index = 0;
                 foreach (var entry in entries)
                 {
@@ -229,14 +243,17 @@ namespace CalculatriceMargeWPF
                     _resultsList.Add(result);
                     index++;
                 }
+
+                _isLoadingHistory = false;
             }
             catch (Exception ex)
             {
+                _isLoadingHistory = false;
                 MessageBox.Show($"Erreur lors du chargement de l'historique:\n{ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
-        private void btnCalculer_Click(object sender, RoutedEventArgs e)
+        private async void btnCalculer_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -320,10 +337,10 @@ namespace CalculatriceMargeWPF
                     {
                         // Mettre à jour l'entrée existante
                         var existingEntry = _historyEntryMap[indexHistorique];
-                        _databaseService.DeleteEntry(existingEntry.Id);
+                        await _databaseService.DeleteEntryAsync(existingEntry.Id);
                     }
 
-                    long newId = _databaseService.AddEntry(historyEntry);
+                    long newId = await _databaseService.AddEntryAsync(historyEntry);
                     historyEntry.Id = (int)newId;
 
                     // Recharger l'historique depuis la base
@@ -394,8 +411,12 @@ namespace CalculatriceMargeWPF
             //}
         }
 
-        private void UpdateDashboard()
+        private async void UpdateDashboard()
         {
+            // Ne mettre à jour que si nécessaire (flag)
+            if (!_needsDashboardUpdate && _cachedStats != null)
+                return;
+
             if (_resultsList.Count == 0)
             {
                 txtDashCalculs.Text = "--";
@@ -404,16 +425,24 @@ namespace CalculatriceMargeWPF
                 txtDashMargeNetteMinMax.Text = "--";
                 txtDashMargeBruteMoy.Text = "--";
                 txtDashLastTitle.Text = "--";
+                _needsDashboardUpdate = false;
                 return;
             }
 
-            var stats = _engine.ComputeStatistics(_resultsList.ToArray());
-            txtDashCalculs.Text = stats.NombreCalculs.ToString();
-            txtDashCA.Text = $"{stats.ChiffreAffairesTotal:F2} €";
-            txtDashMargeNetteMoy.Text = $"{stats.MoyenneMargeNettePct:F2}%";
-            txtDashMargeNetteMinMax.Text = $"{stats.MinMargeNettePct:F2}% / {stats.MaxMargeNettePct:F2}%";
-            txtDashMargeBruteMoy.Text = $"{stats.MoyenneMargeBrutePct:F2}%";
+            // Calculer et mettre en cache les statistiques de manière asynchrone
+            await Task.Run(() =>
+            {
+                _cachedStats = _engine.ComputeStatistics(_resultsList.ToArray());
+            });
+
+            txtDashCalculs.Text = _cachedStats.NombreCalculs.ToString();
+            txtDashCA.Text = $"{_cachedStats.ChiffreAffairesTotal:F2} €";
+            txtDashMargeNetteMoy.Text = $"{_cachedStats.MoyenneMargeNettePct:F2}%";
+            txtDashMargeNetteMinMax.Text = $"{_cachedStats.MinMargeNettePct:F2}% / {_cachedStats.MaxMargeNettePct:F2}%";
+            txtDashMargeBruteMoy.Text = $"{_cachedStats.MoyenneMargeBrutePct:F2}%";
             txtDashLastTitle.Text = _resultsList.Last().Titre;
+            
+            _needsDashboardUpdate = false;
         }
 
         private void ExecuteUndo()
@@ -754,7 +783,7 @@ namespace CalculatriceMargeWPF
             }
         }
 
-        private void btnDeleteSelected_Click(object sender, RoutedEventArgs e)
+        private async void btnDeleteSelected_Click(object sender, RoutedEventArgs e)
         {
             if (lstHistorique.SelectedItem == null)
             {
@@ -773,7 +802,7 @@ namespace CalculatriceMargeWPF
                         var entryToDelete = _historyEntryMap[selectedIndex];
                         
                         // Supprimer de la base de données
-                        _databaseService.DeleteEntry(entryToDelete.Id);
+                        await _databaseService.DeleteEntryAsync(entryToDelete.Id);
                         
                         // Supprimer de la liste des résultats
                         var match = _resultsList.FirstOrDefault(r =>

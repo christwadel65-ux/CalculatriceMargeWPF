@@ -2,6 +2,7 @@ using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace CalculatriceMargeWPF.Models
 {
@@ -284,6 +285,42 @@ namespace CalculatriceMargeWPF.Models
             }
 
             return (0, 0, 0, 0, 0);
+        }
+
+        // ============================
+        // MÉTHODES ASYNCHRONES
+        // ============================
+
+        /// <summary>
+        /// Récupère toutes les entrées de manière asynchrone
+        /// </summary>
+        public async Task<List<HistoryEntry>> GetAllEntriesAsync()
+        {
+            return await Task.Run(() => GetAllEntries());
+        }
+
+        /// <summary>
+        /// Ajoute une entrée de manière asynchrone
+        /// </summary>
+        public async Task<long> AddEntryAsync(HistoryEntry entry)
+        {
+            return await Task.Run(() => AddEntry(entry));
+        }
+
+        /// <summary>
+        /// Supprime une entrée de manière asynchrone
+        /// </summary>
+        public async Task<bool> DeleteEntryAsync(int id)
+        {
+            return await Task.Run(() => DeleteEntry(id));
+        }
+
+        /// <summary>
+        /// Récupère les statistiques de manière asynchrone
+        /// </summary>
+        public async Task<(int Count, double TotalMargeBrute, double TotalMargeNette, double AvgMargeBrutePct, double AvgMargeNettePct)> GetStatisticsAsync()
+        {
+            return await Task.Run(() => GetStatistics());
         }
     }
 }
