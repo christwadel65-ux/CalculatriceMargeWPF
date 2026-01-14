@@ -93,6 +93,11 @@
             <MenuItem Header="Historique" Padding="8,4">
                 <MenuItem Header="Afficher/Masquer" Click="MenuHistorique_Click"/>
             </MenuItem>
+            <MenuItem Header="Outils" Padding="8,4">
+                <MenuItem Header="🗄️ Gestion base de données" Click="MenuDatabase_Click"/>
+                <Separator/>
+                <MenuItem Header="Préférences" Click="MenuPreferences_Click"/>
+            </MenuItem>
             <MenuItem Header="Affichage" Padding="8,4">
                 <MenuItem Header="Thèmes">
                     <MenuItem Header="Clair" Click="MenuTheme_Click" Tag="Light"/>
@@ -102,7 +107,6 @@
                     <MenuItem Header="Français" Click="MenuLanguage_Click" Tag="fr"/>
                     <MenuItem Header="English" Click="MenuLanguage_Click" Tag="en"/>
                 </MenuItem>
-                <MenuItem Header="Préférences" Click="MenuPreferences_Click"/>
             </MenuItem>
             <MenuItem Header="Aide" Padding="8,4">
                 <MenuItem Header="Guide d'utilisation" Click="MenuGuide_Click"/>
@@ -361,11 +365,18 @@
                 <Border Style="{StaticResource Card}">
                     <StackPanel>
                         <TextBlock Text="📋 Historique" Style="{StaticResource SectionTitle}"/>
-                        <ListBox x:Name="lstHistorique" Height="70" Background="White" BorderBrush="#D5DBDB" BorderThickness="1" FontSize="10" Padding="6" MouseDoubleClick="lstHistorique_MouseDoubleClick"/>
+                        <ListBox x:Name="lstHistorique" Height="70" Background="White" BorderBrush="#D5DBDB" BorderThickness="1" FontSize="10" Padding="6" MouseDoubleClick="lstHistorique_MouseDoubleClick">
+                            <ListBox.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="📋 Copier dans le presse-papiers" Click="lstHistorique_CopyToClipboard"/>
+                                    <Separator/>
+                                    <MenuItem Header="📄 Exporter CSV" Click="lstHistorique_ExportCSV"/>
+                                    <MenuItem Header="📊 Exporter HTML" Click="lstHistorique_ExportHTML"/>
+                                </ContextMenu>
+                            </ListBox.ContextMenu>
+                        </ListBox>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,0">
-                            <Button x:Name="btnStatistiques" Content="📊 Stats" Width="100" Height="28" FontSize="11" Background="#16A085" Foreground="White" FontWeight="SemiBold" Click="btnStatistiques_Click" Margin="0,0,5,0" Cursor="Hand"/>
-                            <Button x:Name="btnClearHistory" Content="🗑 Nettoyer" Width="100" Height="28" FontSize="11" Background="{StaticResource DangerBrush}" Foreground="White" FontWeight="SemiBold" Click="btnClearHistory_Click" Margin="3,0,3,0" Cursor="Hand"/>
-                            <Button x:Name="btnDeleteSelected" Content="❌ Supprimer" Width="100" Height="28" FontSize="11" Background="{StaticResource WarningBrush}" Foreground="White" FontWeight="SemiBold" Click="btnDeleteSelected_Click" Margin="5,0,0,0" Cursor="Hand"/>
+                            <Button x:Name="btnStatistiques" Content="�️ Gestion Base de Données" Width="200" Height="28" FontSize="11" Background="#3498DB" Foreground="White" FontWeight="SemiBold" Click="btnStatistiques_Click" Cursor="Hand"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>

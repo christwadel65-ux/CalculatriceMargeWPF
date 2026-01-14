@@ -49,6 +49,7 @@ goto end
 
 :build_standalone
 echo 📦 Publication Standalone (self-contained)...
+echo    ℹ️  Inclut SQLite natif pour la gestion de l'historique
 call dotnet publish "%PROJECTPATH%%PROJECTNAME%.sln" -c Release -r win-x64 /p:PublishSingleFile=true /p:SelfContained=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
 
 if %errorlevel% equ 0 (
@@ -56,7 +57,7 @@ if %errorlevel% equ 0 (
     echo.
     echo 📦 Préparation du dossier Distribution...
     
-    powershell -Command "& {$distFolder = '%PROJECTPATH%Distribution'; $publishFolder = '%PROJECTPATH%bin\Release\net10.0-windows\win-x64\publish'; $readmePath = '%PROJECTPATH%README.md'; if (Test-Path $distFolder) { Remove-Item $distFolder -Recurse -Force }; New-Item -ItemType Directory -Path $distFolder -Force | Out-Null; Get-ChildItem \"$publishFolder\*\" -Exclude *.pdb | Copy-Item -Destination $distFolder -Force -Recurse; if (Test-Path $readmePath) { Copy-Item $readmePath -Destination \"$distFolder\README.md\" -Force }; Write-Host '✅ Dossier Distribution préparé'; Write-Host \"   📁 $distFolder\"}"
+    powershell -Command "& {$distFolder = '%PROJECTPATH%Distribution'; $publishFolder = '%PROJECTPATH%bin\Release\net10.0-windows\win-x64\publish'; $readmePath = '%PROJECTPATH%README.md'; $sqlitePath = '%PROJECTPATH%docs\SQLITE_IMPLEMENTATION.md'; if (Test-Path $distFolder) { Remove-Item $distFolder -Recurse -Force }; New-Item -ItemType Directory -Path $distFolder -Force | Out-Null; Get-ChildItem \"$publishFolder\*\" -Exclude *.pdb | Copy-Item -Destination $distFolder -Force -Recurse; if (Test-Path $readmePath) { Copy-Item $readmePath -Destination \"$distFolder\README.md\" -Force }; if (Test-Path $sqlitePath) { Copy-Item $sqlitePath -Destination \"$distFolder\SQLITE_IMPLEMENTATION.md\" -Force }; Write-Host '✅ Dossier Distribution préparé'; Write-Host \"   📁 $distFolder\"; Write-Host \"   📄 README.md copié\"; Write-Host \"   📄 SQLITE_IMPLEMENTATION.md copié\"}"
 ) else (
     echo ❌ Publication Standalone échouée
 )
@@ -70,4 +71,6 @@ echo   Debug:        bin\Debug\net10.0-windows\CalculatriceMargeWPF.exe
 echo   Release:      bin\Release\net10.0-windows\CalculatriceMargeWPF.exe
 echo   Standalone:   bin\Release\net10.0-windows\win-x64\publish\CalculatriceMargeWPF.exe
 echo   Distribution: Distribution\
+echo.
+echo   ℹ️  Base de données SQLite: %%APPDATA%%\CalculatriceMarge\Historique\historique.db
 echo.

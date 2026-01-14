@@ -48,11 +48,13 @@
     <Page Include="src\Views\MargeViseeDialog.xaml" />
     <Page Include="src\Views\ReadmeDialog.xaml" />
     <Page Include="src\Views\CustomPresetDialog.xaml" />
+    <Page Include="src\Views\DatabaseManagerDialog.xaml" />
     <Compile Include="src\App.xaml.cs" DependentUpon="src\App.xaml" />
     <Compile Include="src\Views\MainWindow.xaml.cs" DependentUpon="src\Views\MainWindow.xaml" />
     <Compile Include="src\Views\MargeViseeDialog.xaml.cs" DependentUpon="src\Views\MargeViseeDialog.xaml" />
     <Compile Include="src\Views\ReadmeDialog.xaml.cs" DependentUpon="src\Views\ReadmeDialog.xaml" />
     <Compile Include="src\Views\CustomPresetDialog.xaml.cs" DependentUpon="src\Views\CustomPresetDialog.xaml" />
+    <Compile Include="src\Views\DatabaseManagerDialog.xaml.cs" DependentUpon="src\Views\DatabaseManagerDialog.xaml" />
   </ItemGroup>
 
   <!-- C# Source Files -->
@@ -60,5 +62,10 @@
     <Compile Include="src\Models\**\*.cs" />
     <Compile Include="src\MVVM\**\*.cs" />
     <Compile Include="src\Helpers\**\*.cs" />
+  </ItemGroup>
+
+  <!-- NuGet Packages -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.0" />
   </ItemGroup>
 </Project>

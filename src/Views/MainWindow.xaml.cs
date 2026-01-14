@@ -22,6 +22,8 @@ namespace CalculatriceMargeWPF
         private const string HISTORIQUE_FILENAME = "historique.txt";
 
         private string historiquePath;
+        private DatabaseService _databaseService;
+        private Dictionary<int, HistoryEntry> _historyEntryMap; // Map index ListBox -> HistoryEntry
         private CalculationEngine _engine;
         private UndoRedoManager _undoRedoManager;
         private PresetManager _presetManager;
@@ -39,6 +41,7 @@ namespace CalculatriceMargeWPF
             _undoRedoManager = new UndoRedoManager();
             _presetManager = new PresetManager();
             _resultsList = new List<CalculationEngine.CalculationResult>();
+            _historyEntryMap = new Dictionary<int, HistoryEntry>();
             
             // Initialiser les gestionnaires
             _localizationManager = LocalizationManager.Instance;
@@ -175,23 +178,56 @@ namespace CalculatriceMargeWPF
                 Directory.CreateDirectory(dossier);
             }
             historiquePath = Path.Combine(dossier, HISTORIQUE_FILENAME);
+
+            // Initialiser la base de données SQLite
+            _databaseService = new DatabaseService(dossier);
+
+            // Migrer l'ancien historique si nécessaire
+            if (File.Exists(historiquePath))
+            {
+                HistoryMigrationService.MigrateFromTextFile(historiquePath, _databaseService);
+            }
         }
 
         private void ChargerHistorique()
         {
             try
             {
-                if (File.Exists(historiquePath))
+                lstHistorique.Items.Clear();
+                _historyEntryMap.Clear();
+                _resultsList.Clear();
+
+                var entries = _databaseService.GetAllEntries();
+                int index = 0;
+                foreach (var entry in entries)
                 {
-                    var lignes = File.ReadAllLines(historiquePath);
-                    lstHistorique.Items.Clear();
-                    foreach (var ligne in lignes)
+                    lstHistorique.Items.Add(entry.ToString());
+                    _historyEntryMap[index] = entry;
+                    
+                    // Reconstruire _resultsList pour les statistiques
+                    double fraisEnEuro = entry.FraisModeIndex == 0 
+                        ? entry.DebourseSec * (entry.FraisGeneraux / 100) 
+                        : entry.FraisGeneraux;
+
+                    var result = new CalculationEngine.CalculationResult
                     {
-                        if (!string.IsNullOrWhiteSpace(ligne))
-                        {
-                            lstHistorique.Items.Add(ligne);
-                        }
-                    }
+                        Titre = entry.Titre,
+                        DebourseSec = entry.DebourseSec,
+                        FraisGeneraux = entry.FraisGeneraux,
+                        FraisEnPourcent = entry.FraisModeIndex == 0,
+                        FraisEnEuro = fraisEnEuro,
+                        PrixVenteHT = entry.PrixVenteHT,
+                        TVAPct = entry.TVA,
+                        PrixRevientTotal = entry.PrixRevient,
+                        MargeBruteEuro = entry.MargeBrute,
+                        MargeBrutePct = entry.MargeBrutePourcentage,
+                        MargeNetteEuro = entry.MargeNette,
+                        MargeNettePct = entry.MargeNettePourcentage,
+                        PrixVenteTTC = entry.PrixVenteTTC,
+                        CalculDateTime = entry.DateCalcul
+                    };
+                    _resultsList.Add(result);
+                    index++;
                 }
             }
             catch (Exception ex)
@@ -260,25 +296,38 @@ namespace CalculatriceMargeWPF
                 // Afficher les résultats
                 AfficherResultats(result);
                 
-                // Sauvegarder dans l'historique
+                // Sauvegarder dans l'historique SQLite
                 try
                 {
-                    string ligneHistorique = result.ToString();
-                    
-                    if (indexHistorique >= 0)
+                    var historyEntry = new HistoryEntry
                     {
-                        // Mettre à jour la ligne existante
-                        lstHistorique.Items[indexHistorique] = ligneHistorique;
-                    }
-                    else
+                        Titre = result.Titre,
+                        DebourseSec = result.DebourseSec,
+                        FraisGeneraux = fraisGenerauxPct,
+                        FraisModeIndex = fraisEnPourcent ? 0 : 1,
+                        PrixVenteHT = result.PrixVenteHT,
+                        TVA = tva,
+                        PrixRevient = result.PrixRevientTotal,
+                        MargeBrute = result.MargeBruteEuro,
+                        MargeBrutePourcentage = result.MargeBrutePct,
+                        MargeNette = result.MargeNetteEuro,
+                        MargeNettePourcentage = result.MargeNettePct,
+                        PrixVenteTTC = result.PrixVenteTTC,
+                        DateCalcul = DateTime.Now
+                    };
+
+                    if (indexHistorique >= 0 && _historyEntryMap.ContainsKey(indexHistorique))
                     {
-                        // Ajouter nouvelle ligne
-                        lstHistorique.Items.Add(ligneHistorique);
+                        // Mettre à jour l'entrée existante
+                        var existingEntry = _historyEntryMap[indexHistorique];
+                        _databaseService.DeleteEntry(existingEntry.Id);
                     }
-                    
-                    // Réécrire tout l'historique
-                    var toutesLignes = lstHistorique.Items.Cast<string>().ToList();
-                    File.WriteAllLines(historiquePath, toutesLignes, System.Text.Encoding.UTF8);
+
+                    long newId = _databaseService.AddEntry(historyEntry);
+                    historyEntry.Id = (int)newId;
+
+                    // Recharger l'historique depuis la base
+                    ChargerHistorique();
                 }
                 catch (Exception exHist)
                 {
@@ -524,31 +573,21 @@ namespace CalculatriceMargeWPF
         {
             try
             {
-                if (_resultsList.Count == 0)
-                {
-                    MessageBox.Show("Aucun calcul pour les statistiques.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
-                    return;
-                }
+                string appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                string databasePath = System.IO.Path.Combine(appDataFolder, HISTORIQUE_FOLDER, HISTORIQUE_SUBFOLDER, "historique.db");
+                
+                var dialog = new DatabaseManagerDialog(_databaseService, databasePath);
+                dialog.Owner = this;
+                dialog.ShowDialog();
 
-                var stats = _engine.ComputeStatistics(_resultsList.ToArray());
-
-                string message = $"STATISTIQUES ({stats.NombreCalculs} calculs)\n\n" +
-                    $"Chiffre d'affaires TTC: {stats.ChiffreAffairesTotal:F2}€\n" +
-                    $"Marge nette totale: {stats.MargeNetteEuroTotal:F2}€\n\n" +
-                    $"MARGE BRUTE\n" +
-                    $"Moyenne: {stats.MoyenneMargeBrutePct:F2}%\n" +
-                    $"Min - Max: {stats.MinMargeBrutePct:F2}% - {stats.MaxMargeBrutePct:F2}%\n" +
-                    $"Écart-type: {stats.EcartTypeMargeBrutePct:F2}%\n\n" +
-                    $"MARGE NETTE\n" +
-                    $"Moyenne: {stats.MoyenneMargeNettePct:F2}%\n" +
-                    $"Min - Max: {stats.MinMargeNettePct:F2}% - {stats.MaxMargeNettePct:F2}%\n" +
-                    $"Écart-type: {stats.EcartTypeMargeNettePct:F2}%";
-
-                MessageBox.Show(message, "Statistiques", MessageBoxButton.OK, MessageBoxImage.Information);
+                // Recharger l'historique après fermeture de la fenêtre de gestion
+                ChargerHistorique();
+                UpdateDashboard();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erreur calcul statistiques:\n{ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Erreur lors de l'ouverture du gestionnaire de base de données :\n{ex.Message}", 
+                    "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -624,8 +663,6 @@ namespace CalculatriceMargeWPF
         {
             bool visible = lstHistorique.Visibility == Visibility.Collapsed;
             lstHistorique.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
-            btnClearHistory.Visibility = lstHistorique.Visibility;
-            btnDeleteSelected.Visibility = lstHistorique.Visibility;
         }
 
         private void txtRemise_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
@@ -708,8 +745,9 @@ namespace CalculatriceMargeWPF
         {
             if (MessageBox.Show("Voulez-vous vraiment supprimer tout l'historique ?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
+                _databaseService.ClearHistory();
                 lstHistorique.Items.Clear();
-                if (File.Exists(historiquePath)) File.WriteAllText(historiquePath, string.Empty);
+                _historyEntryMap.Clear();
                 _resultsList.Clear();
                 UpdateDashboard();
                 MessageBox.Show("Historique nettoyé avec succès.", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -728,34 +766,26 @@ namespace CalculatriceMargeWPF
             {
                 try
                 {
-                    var selectedText = lstHistorique.SelectedItem.ToString();
-                    lstHistorique.Items.Remove(lstHistorique.SelectedItem);
-
-                    if (HistoryParser.TryParseHistoryLine(selectedText, out var entry))
+                    int selectedIndex = lstHistorique.SelectedIndex;
+                    
+                    if (_historyEntryMap.ContainsKey(selectedIndex))
                     {
+                        var entryToDelete = _historyEntryMap[selectedIndex];
+                        
+                        // Supprimer de la base de données
+                        _databaseService.DeleteEntry(entryToDelete.Id);
+                        
+                        // Supprimer de la liste des résultats
                         var match = _resultsList.FirstOrDefault(r =>
-                            r.Titre == entry.Titre &&
-                            Math.Abs(r.DebourseSec - entry.DebourseSec) < 0.01 &&
-                            Math.Abs(r.PrixVenteHT - entry.PrixVente) < 0.01);
+                            r.Titre == entryToDelete.Titre &&
+                            Math.Abs(r.DebourseSec - entryToDelete.DebourseSec) < 0.01 &&
+                            Math.Abs(r.PrixVenteHT - entryToDelete.PrixVenteHT) < 0.01);
 
                         if (match != null)
                             _resultsList.Remove(match);
-                    }
-                    
-                    // Réécrire le fichier historique avec les éléments restants
-                    if (lstHistorique.Items.Count > 0)
-                    {
-                        StringBuilder sb = new StringBuilder();
-                        foreach (var item in lstHistorique.Items)
-                        {
-                            sb.AppendLine(item.ToString());
-                        }
-                        File.WriteAllText(historiquePath, sb.ToString());
-                    }
-                    else
-                    {
-                        // Si vide, créer un fichier vide
-                        File.WriteAllText(historiquePath, string.Empty);
+                        
+                        // Recharger l'historique depuis la base
+                        ChargerHistorique();
                     }
                     
                     // Réinitialiser les champs de la calculatrice
@@ -775,10 +805,9 @@ namespace CalculatriceMargeWPF
         {
             if (lstHistorique.SelectedItem == null) return;
 
-            string item = lstHistorique.SelectedItem.ToString();
+            int selectedIndex = lstHistorique.SelectedIndex;
             
-            // Utiliser le parser d'historique pour extraire les valeurs
-            if (!HistoryParser.TryParseHistoryLine(item, out var entry))
+            if (!_historyEntryMap.ContainsKey(selectedIndex))
             {
                 MessageBox.Show("Impossible de charger ce calcul.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
@@ -786,10 +815,12 @@ namespace CalculatriceMargeWPF
 
             try
             {
+                var entry = _historyEntryMap[selectedIndex];
+                
                 txtTitre.Text = entry.Titre;
                 txtDebourse.Text = entry.DebourseSec.ToString("F2");
                 txtFrais.Text = entry.FraisGeneraux.ToString("F2");
-                txtVente.Text = entry.PrixVente.ToString("F2");
+                txtVente.Text = entry.PrixVenteHT.ToString("F2");
                 txtTVA.Text = entry.TVA.ToString("F2");
                 cmbFraisMode.SelectedIndex = entry.FraisModeIndex;
 
@@ -798,6 +829,153 @@ namespace CalculatriceMargeWPF
             catch (Exception ex)
             {
                 MessageBox.Show($"Erreur lors du chargement : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void lstHistorique_CopyToClipboard(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (lstHistorique.SelectedItem == null)
+                {
+                    MessageBox.Show("Veuillez sélectionner un élément à copier.", "Information", 
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                string selectedText = lstHistorique.SelectedItem.ToString();
+                System.Windows.Clipboard.SetText(selectedText);
+                MessageBox.Show("✅ Élément copié dans le presse-papiers.", "Succès",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors de la copie :\n{ex.Message}", "Erreur",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void lstHistorique_ExportCSV(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (lstHistorique.SelectedItem == null)
+                {
+                    MessageBox.Show("Veuillez sélectionner un élément à exporter.", "Information",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                int selectedIndex = lstHistorique.SelectedIndex;
+                if (!_historyEntryMap.ContainsKey(selectedIndex))
+                {
+                    MessageBox.Show("Élément introuvable.", "Erreur",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                var entry = _historyEntryMap[selectedIndex];
+                var result = new CalculationEngine.CalculationResult
+                {
+                    Titre = entry.Titre,
+                    DebourseSec = entry.DebourseSec,
+                    FraisGeneraux = entry.FraisGeneraux,
+                    FraisEnPourcent = entry.FraisModeIndex == 0,
+                    FraisEnEuro = entry.FraisModeIndex == 0 
+                        ? entry.DebourseSec * (entry.FraisGeneraux / 100) 
+                        : entry.FraisGeneraux,
+                    PrixVenteHT = entry.PrixVenteHT,
+                    TVAPct = entry.TVA,
+                    PrixRevientTotal = entry.PrixRevient,
+                    MargeBruteEuro = entry.MargeBrute,
+                    MargeBrutePct = entry.MargeBrutePourcentage,
+                    MargeNetteEuro = entry.MargeNette,
+                    MargeNettePct = entry.MargeNettePourcentage,
+                    PrixVenteTTC = entry.PrixVenteTTC,
+                    CalculDateTime = entry.DateCalcul
+                };
+
+                SaveFileDialog dialog = new SaveFileDialog
+                {
+                    Filter = "CSV (*.csv)|*.csv",
+                    DefaultExt = ".csv",
+                    FileName = $"marge_{entry.Titre}_{DateTime.Now:yyyyMMdd_HHmmss}.csv"
+                };
+
+                if (dialog.ShowDialog() == true)
+                {
+                    ExportManager.ExportToCSV(new List<CalculationEngine.CalculationResult> { result }, dialog.FileName);
+                    MessageBox.Show($"✅ Élément exporté vers:\n{dialog.FileName}", "Succès",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors de l'export CSV :\n{ex.Message}", "Erreur",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void lstHistorique_ExportHTML(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (lstHistorique.SelectedItem == null)
+                {
+                    MessageBox.Show("Veuillez sélectionner un élément à exporter.", "Information",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                int selectedIndex = lstHistorique.SelectedIndex;
+                if (!_historyEntryMap.ContainsKey(selectedIndex))
+                {
+                    MessageBox.Show("Élément introuvable.", "Erreur",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                var entry = _historyEntryMap[selectedIndex];
+                var result = new CalculationEngine.CalculationResult
+                {
+                    Titre = entry.Titre,
+                    DebourseSec = entry.DebourseSec,
+                    FraisGeneraux = entry.FraisGeneraux,
+                    FraisEnPourcent = entry.FraisModeIndex == 0,
+                    FraisEnEuro = entry.FraisModeIndex == 0 
+                        ? entry.DebourseSec * (entry.FraisGeneraux / 100) 
+                        : entry.FraisGeneraux,
+                    PrixVenteHT = entry.PrixVenteHT,
+                    TVAPct = entry.TVA,
+                    PrixRevientTotal = entry.PrixRevient,
+                    MargeBruteEuro = entry.MargeBrute,
+                    MargeBrutePct = entry.MargeBrutePourcentage,
+                    MargeNetteEuro = entry.MargeNette,
+                    MargeNettePct = entry.MargeNettePourcentage,
+                    PrixVenteTTC = entry.PrixVenteTTC,
+                    CalculDateTime = entry.DateCalcul
+                };
+
+                SaveFileDialog dialog = new SaveFileDialog
+                {
+                    Filter = "HTML (*.html)|*.html",
+                    DefaultExt = ".html",
+                    FileName = $"marge_{entry.Titre}_{DateTime.Now:yyyyMMdd_HHmmss}.html"
+                };
+
+                if (dialog.ShowDialog() == true)
+                {
+                    var stats = _engine.ComputeStatistics(new[] { result });
+                    ExportManager.ExportToHTML(stats, new List<CalculationEngine.CalculationResult> { result }, 
+                        dialog.FileName, $"Rapport - {entry.Titre}");
+                    MessageBox.Show($"✅ Élément exporté vers:\n{dialog.FileName}", "Succès",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors de l'export HTML :\n{ex.Message}", "Erreur",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -1021,6 +1199,28 @@ namespace CalculatriceMargeWPF
                 "Préférences", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
+        private void MenuDatabase_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                string databasePath = System.IO.Path.Combine(appDataFolder, HISTORIQUE_FOLDER, HISTORIQUE_SUBFOLDER, "historique.db");
+                
+                var dialog = new DatabaseManagerDialog(_databaseService, databasePath);
+                dialog.Owner = this;
+                dialog.ShowDialog();
+
+                // Recharger l'historique après fermeture de la fenêtre de gestion
+                ChargerHistorique();
+                UpdateDashboard();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors de l'ouverture de la gestion de la base de données :\n{ex.Message}", 
+                    "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private string GetInternetExplorerPath()
         {
             string[] candidates =
@@ -1086,21 +1286,33 @@ namespace CalculatriceMargeWPF
         {
             string message = "Calculatrice de Marge\n\n" +
                            "Version : 2.2.0\n" +
-                           "Développé avec WPF (.NET 10)\n\n" +
+                           "Développé avec WPF (.NET 10.0)\n" +
+                           "Base de données : SQLite\n\n" +
                            "Application professionnelle de calcul de marge commerciale.\n\n" +
-                           "Fonctionnalités :\n" +
+                           "Fonctionnalités principales :\n" +
                            "• Calcul automatique des marges brute et nette\n" +
                            "• Calcul inversé : déterminer le prix de vente à partir de la marge souhaitée\n" +
                            "• Gestion flexible des frais généraux (% ou €)\n" +
-                           "• Historique intelligent avec rechargement et rétrocompatibilité\n" +
+                           "• Remises commerciales avec recalcul instantané\n\n" +
+                           "Historique & Données :\n" +
+                           "• Base de données SQLite robuste et performante\n" +
+                           "• Sauvegarde et restauration de l'historique\n" +
+                           "• Migration automatique depuis l'ancien format\n" +
+                           "• Statistiques avancées et recherche par titre\n" +
+                           "• Gestionnaire intégré (Outils > Gestion base de données)\n\n" +
+                           "Préconfigurations & Export :\n" +
                            "• Préconfigurations rapides (Standard, Réduit, Service)\n" +
-                           "• Récap rapide : Déboursé sec, Prix HT, Prix TTC\n" +
-                           "• Statistiques détaillées et analyses\n" +
+                           "• Création de présets personnalisés\n" +
                            "• Export CSV et génération de rapports HTML\n" +
-                           "• Undo/Redo (Ctrl+Z, Ctrl+Y)\n" +
+                           "• Récap rapide : Déboursé sec, Prix HT, Prix TTC\n\n" +
+                           "Interface :\n" +
                            "• Interface moderne avec thème sombre/clair\n" +
-                           "• Séparateurs de milliers et formatage professionnel\n\n" +
-                           "© 2025 C. Lecomte - Tous droits réservés";
+                           "• Séparateurs de milliers et formatage professionnel\n" +
+                           "• Undo/Redo (Ctrl+Z, Ctrl+Y)\n" +
+                           "• Raccourcis clavier intuitifs\n" +
+                           "• Support complet du clavier (Entrée pour calculer)\n\n" +
+                           "© 2025-2026 C. Lecomte - Tous droits réservés\n" +
+                           "GitHub : https://github.com/christwadel65-ux/CalculatriceMarge";
             
             MessageBox.Show(message, "À propos", MessageBoxButton.OK, MessageBoxImage.Information);
         }
