@@ -1345,5 +1345,38 @@ namespace CalculatriceMargeWPF
             
             MessageBox.Show(message, "À propos", MessageBoxButton.OK, MessageBoxImage.Information);
         }
+
+        /// <summary>
+        /// Gestionnaire de fermeture de la fenêtre - libération des ressources
+        /// </summary>
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            try
+            {
+                // Arrêter le timer d'auto-sauvegarde
+                if (_autoSaveTimer != null)
+                {
+                    _autoSaveTimer.Stop();
+                    _autoSaveTimer.Tick -= (s, args) => AutoSaveHistorique();
+                }
+
+                // Libérer le service de base de données
+                if (_databaseService != null)
+                {
+                    _databaseService.Dispose();
+                }
+
+                // Sauvegarder les préférences
+                if (_preferencesManager != null)
+                {
+                    _preferencesManager.SavePreferences();
+                }
+            }
+            catch (Exception ex)
+            {
+                // Ne pas bloquer la fermeture en cas d'erreur
+                System.Diagnostics.Debug.WriteLine($"Erreur lors de la fermeture : {ex.Message}");
+            }
+        }
     }
 }

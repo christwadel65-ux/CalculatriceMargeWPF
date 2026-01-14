@@ -9,10 +9,11 @@ namespace CalculatriceMargeWPF.Models
     /// <summary>
     /// Service de gestion de la base de données SQLite pour l'historique
     /// </summary>
-    public class DatabaseService
+    public class DatabaseService : IDisposable
     {
         private readonly string _databasePath;
         private const string DATABASE_FILENAME = "historique.db";
+        private bool _disposed = false;
 
         public DatabaseService(string appDataFolder)
         {
@@ -321,6 +322,33 @@ namespace CalculatriceMargeWPF.Models
         public async Task<(int Count, double TotalMargeBrute, double TotalMargeNette, double AvgMargeBrutePct, double AvgMargeNettePct)> GetStatisticsAsync()
         {
             return await Task.Run(() => GetStatistics());
+        }
+
+        /// <summary>
+        /// Libère les ressources utilisées par le service
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    // Fermer toutes les connexions SQLite en attente
+                    SqliteConnection.ClearAllPools();
+                }
+                _disposed = true;
+            }
+        }
+
+        ~DatabaseService()
+        {
+            Dispose(false);
         }
     }
 }

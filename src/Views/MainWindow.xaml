@@ -5,7 +5,8 @@
         Height="720" Width="780" 
         Background="#F0F3F7" 
         FontFamily="Segoe UI"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        Closing="Window_Closing">
     
     <Window.Resources>
         <SolidColorBrush x:Key="PrimaryBrush" Color="#3498DB"/>
