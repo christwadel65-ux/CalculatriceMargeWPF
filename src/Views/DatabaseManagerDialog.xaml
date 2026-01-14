@@ -320,6 +320,62 @@
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
+
+            <!-- Onglet Éléments -->
+            <TabItem Header="📋 Éléments">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="15">
+                        <TextBlock Style="{StaticResource SectionTitle}" Text="Liste des éléments"/>
+                        
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <TextBox x:Name="txtSearchItems" Width="250" Text="Rechercher par titre..." TextChanged="txtSearchItems_TextChanged" Foreground="#999"/>
+                            <Button Content="🔍 Rechercher" Style="{StaticResource ActionButton}" Click="btnSearchItems_Click" Width="150" Margin="10,0,0,0"/>
+                        </StackPanel>
+
+                        <DataGrid x:Name="dgElements" 
+                                  AutoGenerateColumns="False" 
+                                  Height="400"
+                                  BorderBrush="#BDC3C7"
+                                  BorderThickness="1"
+                                  Background="White"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  IsReadOnly="True">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Titre" Binding="{Binding Titre}" Width="200"/>
+                                <DataGridTextColumn Header="Date" Binding="{Binding DateCalcul, StringFormat=dd/MM/yyyy HH:mm}" Width="150"/>
+                                <DataGridTextColumn Header="Déboursé" Binding="{Binding DebourseSec, StringFormat=F2}" Width="100"/>
+                                <DataGridTextColumn Header="Prix HT" Binding="{Binding PrixVenteHT, StringFormat=F2}" Width="100"/>
+                                <DataGridTextColumn Header="Marge %" Binding="{Binding MargeBrutePourcentage, StringFormat=F2}" Width="80"/>
+                                <DataGridTextColumn Header="TVA" Binding="{Binding TVA, StringFormat=F2}" Width="60"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <Button Content="📥 Charger" 
+                                    Style="{StaticResource ActionButton}"
+                                    Click="btnLoadElement_Click"
+                                    Width="150"
+                                    Margin="0,0,5,0"/>
+                            <Button Content="📄 Exporter" 
+                                    Style="{StaticResource ActionButton}"
+                                    Click="btnExportElement_Click"
+                                    Width="150"
+                                    Margin="5,0,5,0"/>
+                            <Button Content="📋 Copier" 
+                                    Style="{StaticResource ActionButton}"
+                                    Click="btnCopyElement_Click"
+                                    Width="150"/>
+                        </StackPanel>
+
+                        <TextBlock Text="💡 Double-cliquez sur un élément pour voir les détails complets" 
+                                   FontSize="11" 
+                                   Foreground="#7F8C8D" 
+                                   Margin="0,15,0,0"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
         </TabControl>
 
         <!-- Pied de page -->

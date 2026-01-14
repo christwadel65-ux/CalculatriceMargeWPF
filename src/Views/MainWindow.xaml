@@ -93,7 +93,7 @@
             <MenuItem Header="Historique" Padding="8,4">
                 <MenuItem Header="Afficher/Masquer" Click="MenuHistorique_Click"/>
             </MenuItem>
-            <MenuItem Header="Outils" Padding="8,4">
+            <MenuItem Header="Gestion BD" Padding="8,4">
                 <MenuItem Header="🗄️ Gestion base de données" Click="MenuDatabase_Click"/>
                 <Separator/>
                 <MenuItem Header="Préférences" Click="MenuPreferences_Click"/>
