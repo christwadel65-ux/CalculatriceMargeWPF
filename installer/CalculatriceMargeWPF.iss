@@ -104,19 +104,50 @@ begin
       { Demander à l'utilisateur s'il veut conserver la base de données }
       if MsgBox('La base de données de votre historique a été trouvée.' + #13#10 + #13#10 +
                 'Emplacement : ' + DatabaseFile + #13#10 + #13#10 +
-                'Voulez-vous conserver votre historique après la désinstallation ?' + #13#10 +
+                'Voulez-vous conserver votre historique après la désinstallation ?' + #13#10 + #13#10 +
                 'Cliquez OUI pour conserver les données.' + #13#10 +
-                'Cliquez NON pour supprimer tous les fichiers.',
+                'Cliquez NON pour supprimer tous les fichiers de la base de données.',
                 mbConfirmation, MB_YESNO) = IDNO then
       begin
-        { Supprimer toute la base de données et les dossiers }
-        DelTree(DataFolder, True, True, True);
+        { Confirmation supplémentaire avant suppression }
+        if MsgBox('⚠️ ATTENTION - SUPPRESSION DÉFINITIVE' + #13#10 + #13#10 +
+                  'Vous êtes sur le point de supprimer définitivement votre historique.' + #13#10 + #13#10 +
+                  'Cette action est IRRÉVERSIBLE.' + #13#10 + #13#10 +
+                  'Êtes-vous absolument sûr de vouloir supprimer la base de données ?' + #13#10 +
+                  'Dossier à supprimer : ' + DataFolder,
+                  mbWarning, MB_YESNO) = IDYES then
+        begin
+          { Supprimer toute la base de données et les dossiers }
+          if DelTree(DataFolder, True, True, True) then
+          begin
+            MsgBox('✅ Suppression réussie' + #13#10 + #13#10 +
+                   'Votre base de données et tous vos historiques ont été supprimés.',
+                   mbInformation, MB_OK);
+          end
+          else
+          begin
+            MsgBox('⚠️ Erreur lors de la suppression' + #13#10 + #13#10 +
+                   'Impossible de supprimer complètement la base de données.' + #13#10 +
+                   'Vous pouvez la supprimer manuellement dans :' + #13#10 +
+                   DataFolder,
+                   mbError, MB_OK);
+          end;
+        end
+        else
+        begin
+          { Utilisateur a annulé la suppression }
+          MsgBox('Suppression annulée.' + #13#10 +
+                 'Votre base de données a été conservée.' + #13#10 +
+                 'Dossier : ' + DataFolder,
+                 mbInformation, MB_OK);
+        end;
       end
       else
       begin
-        { Conserver la base de données, supprimer uniquement les fichiers temporaires }
-        MsgBox('Votre base de données a été conservée.' + #13#10 +
-               'Vous pouvez la réimporter lors d''une réinstallation ultérieure.' + #13#10 +
+        { Conserver la base de données }
+        MsgBox('✅ Conservation réussie' + #13#10 + #13#10 +
+               'Votre base de données a été conservée.' + #13#10 +
+               'Vous pouvez la réimporter lors d''une réinstallation ultérieure.' + #13#10 + #13#10 +
                'Dossier : ' + DataFolder,
                mbInformation, MB_OK);
       end;
