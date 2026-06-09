@@ -34,3 +34,5 @@ bld/
 [Oo]bj/
 
 installer/
+
+.fake

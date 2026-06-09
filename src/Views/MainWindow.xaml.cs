@@ -885,8 +885,12 @@ namespace CalculatriceMargeWPF
                 txtDebourse.Text = entry.DebourseSec.ToString("F2");
                 txtFrais.Text = entry.FraisGeneraux.ToString("F2");
                 txtVente.Text = entry.PrixVenteHT.ToString("F2");
+                txtRemise.Text = entry.RemisePourcentage.ToString("F2");
                 txtTVA.Text = entry.TVA.ToString("F2");
                 cmbFraisMode.SelectedIndex = entry.FraisModeIndex;
+
+                // Recalculer le prix après remise pour aligner le champ et le calcul futur
+                CalculerRemise();
 
                 MessageBox.Show("Calcul rechargé depuis l'historique. Cliquez sur 'Calculer' pour voir les résultats.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
             }
